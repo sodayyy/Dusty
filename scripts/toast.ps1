@@ -7,39 +7,21 @@ param(
     [string]$Text
 )
 
-$AppId = 'Dusty.Notifier'
-
-[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom, ContentType = WindowsRuntime] | Out-Null
-
 if ($Type -eq 'done') {
-    $title = 'Dusty dev progress'
+    Write-Host "[Dusty] DONE: $Text"
+    # Pleasant triple ascending beep
+    [Console]::Beep(800, 150)
+    Start-Sleep -Milliseconds 80
+    [Console]::Beep(1000, 150)
+    Start-Sleep -Milliseconds 80
+    [Console]::Beep(1200, 300)
 }
 else {
-    $title = 'Needs your attention'
-}
-
-$escapedTitle = [System.Security.SecurityElement]::Escape($title)
-$escapedText  = [System.Security.SecurityElement]::Escape($Text)
-
-$template = @"
-<toast>
-    <visual>
-        <binding template="ToastGeneric">
-            <text>${escapedTitle}</text>
-            <text>${escapedText}</text>
-        </binding>
-    </visual>
-</toast>
-"@
-
-try {
-    $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
-    $xml.LoadXml($template)
-    $toast = New-Object Windows.UI.Notifications.ToastNotification($xml)
-    [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($AppId).Show($toast)
-    Write-Host "Toast sent: $Type - $Text"
-}
-catch {
-    Write-Host "Toast FAILED: $($_.Exception.Message)"
+    Write-Host "[Dusty] STUCK: $Text"
+    # Urgent double lower beep
+    [Console]::Beep(500, 300)
+    Start-Sleep -Milliseconds 150
+    [Console]::Beep(500, 300)
+    Start-Sleep -Milliseconds 200
+    [Console]::Beep(400, 500)
 }
