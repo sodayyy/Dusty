@@ -1,20 +1,29 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2 } from "lucide-react";
+import { Trash2, PieChart } from "lucide-react";
 import AppList from "@/components/AppList";
 import { useAppStore } from "@/store";
 
-export default function Home() {
+export default function Home({ onNavigate }: { onNavigate: (page: "diskclean") => void }) {
   const selectedApp = useAppStore((s) => s.selectedApp);
   const startUninstall = useAppStore((s) => s.startUninstall);
 
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto">
       {/* Header */}
-      <header className="shrink-0 px-4 pt-5 pb-3">
-        <h1 className="text-xl font-semibold text-foreground">
-          <span className="text-primary">Dusty</span>
-        </h1>
-        <p className="text-xs text-muted-foreground mt-0.5">你的专属 Windows 清洁工</p>
+      <header className="shrink-0 px-4 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">
+            <span className="text-primary">Dusty</span>
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">你的专属 Windows 清洁工</p>
+        </div>
+        <button
+          onClick={() => onNavigate("diskclean")}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <PieChart className="w-3.5 h-3.5" />
+          磁盘分析
+        </button>
       </header>
 
       {/* App list */}

@@ -14,33 +14,32 @@ $AppId = 'Dusty.Notifier'
 
 if ($Type -eq 'done') {
     $title = 'Dusty dev progress'
-    $icon = [char]::ConvertFromUtf32(0x2705)
 }
 else {
     $title = 'Needs your attention'
-    $icon = '' + [char]::ConvertFromUtf32(0x26A0) + [char]::ConvertFromUtf32(0xFE0F)
 }
 
-$fullTitle = "$icon $title"
+$escapedTitle = [System.Security.SecurityElement]::Escape($title)
+$escapedText  = [System.Security.SecurityElement]::Escape($Text)
 
 $template = @"
 <toast>
     <visual>
         <binding template="ToastGeneric">
-            <text>$fullTitle</text>
-            <text>$Text</text>
+            <text>${escapedTitle}</text>
+            <text>${escapedText}</text>
         </binding>
     </visual>
 </toast>
 "@
 
-$xml = New-Object Windows.Data.Xml.Dom.XmlDocument
-$xml.LoadXml($template)
-$toast = New-Object Windows.UI.Notifications.ToastNotification($xml)
-
 try {
+    $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+    $xml.LoadXml($template)
+    $toast = New-Object Windows.UI.Notifications.ToastNotification($xml)
     [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($AppId).Show($toast)
+    Write-Host "Toast sent: $Type - $Text"
 }
 catch {
-    Write-Warning "Toast failed: $($_.Exception.Message)"
+    Write-Host "Toast FAILED: $($_.Exception.Message)"
 }

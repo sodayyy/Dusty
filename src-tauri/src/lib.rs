@@ -1,10 +1,13 @@
 mod app_list;
+mod classifier;
 mod registry;
 mod residue;
+mod scanner;
 mod staging;
 mod uninstaller;
 use app_list::get_installed_apps;
 use residue::scan_residues;
+use scanner::{get_default_scan_paths, scan_classified, scan_disk, scan_single_path};
 use staging::{
     check_interrupted, empty_trash, list_staged, move_to_staging, restore_from_staging,
 };
@@ -32,7 +35,11 @@ pub fn run() {
             list_staged,
             restore_from_staging,
             empty_trash,
-            check_interrupted
+            check_interrupted,
+            scan_disk,
+            scan_single_path,
+            scan_classified,
+            get_default_scan_paths
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
