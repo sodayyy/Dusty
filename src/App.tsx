@@ -2,28 +2,42 @@ import { useState } from "react";
 import Home from "@/pages/Home";
 import Uninstall from "@/pages/Uninstall";
 import DiskClean from "@/pages/DiskClean";
+import Settings from "@/pages/Settings";
+import ChatBubble from "@/components/ChatBubble";
 import { useAppStore } from "@/store";
 
-type Page = "home" | "diskclean";
+type Page = "home" | "diskclean" | "settings";
 
 function App() {
   const uninstallPhase = useAppStore((s) => s.uninstallPhase);
   const [page, setPage] = useState<Page>("home");
 
   if (uninstallPhase !== "idle") {
-    return <Uninstall />;
+    return (
+      <>
+        <Uninstall />
+        <ChatBubble />
+      </>
+    );
   }
 
-  switch (page) {
-    case "diskclean":
-      return (
-        <DiskClean
-          onBack={() => setPage("home")}
-        />
-      );
-    default:
-      return <Home onNavigate={setPage} />;
-  }
+  const renderPage = () => {
+    switch (page) {
+      case "diskclean":
+        return <DiskClean onBack={() => setPage("home")} />;
+      case "settings":
+        return <Settings onBack={() => setPage("home")} />;
+      default:
+        return <Home onNavigate={setPage} />;
+    }
+  };
+
+  return (
+    <>
+      {renderPage()}
+      <ChatBubble />
+    </>
+  );
 }
 
 export default App;
