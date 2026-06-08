@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "dusty",
+  "productName": "Dusty",
   "version": "0.1.0",
-  "identifier": "com.dusty.app",
+  "identifier": "com.dusty.cleaner",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "Dusty",
-        "width": 1024,
-        "height": 720
+        "title": "Dusty — 磁盘清理",
+        "width": 1000,
+        "height": 680,
+        "minWidth": 800,
+        "minHeight": 600
       }
     ],
     "security": {
@@ -23,7 +25,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
