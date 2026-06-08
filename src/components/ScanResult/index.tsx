@@ -14,21 +14,21 @@ import type { ResidueItem } from "@/lib/tauri-commands";
 
 const safetyStyles: Record<string, { bg: string; text: string; border: string; label: string }> = {
   safe: {
-    bg: "bg-[#6DBF9E]/10",
-    text: "text-[#6DBF9E]",
-    border: "border-[#6DBF9E]/30",
+    bg: "bg-safe/10",
+    text: "text-safe",
+    border: "border-safe/30",
     label: "可清理",
   },
   caution: {
-    bg: "bg-[#F0C070]/10",
-    text: "text-[#F0C070]",
-    border: "border-[#F0C070]/30",
+    bg: "bg-warn/10",
+    text: "text-warn",
+    border: "border-warn/30",
     label: "谨慎",
   },
   never: {
-    bg: "bg-[#E07060]/10",
-    text: "text-[#E07060]",
-    border: "border-[#E07060]/30",
+    bg: "bg-danger/10",
+    text: "text-danger",
+    border: "border-danger/30",
     label: "禁止",
   },
 };

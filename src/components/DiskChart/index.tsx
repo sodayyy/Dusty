@@ -2,22 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { CategorySummary } from "@/lib/tauri-commands";
-
-const COLORS: Record<string, string> = {
-  software: "#4A90D9",
-  system: "#E07060",
-  cache: "#6DBF9E",
-  documents: "#F0C070",
-  installer: "#E8A87C",
-  other: "#A09080",
-};
-
-function formatSize(kb: number): string {
-  if (kb < 1024) return `${kb} KB`;
-  const mb = kb / 1024;
-  if (mb < 1024) return `${mb.toFixed(0)} MB`;
-  return `${(mb / 1024).toFixed(1)} GB`;
-}
+import { catColorHex } from "@/lib/colors";
+import { formatSize } from "@/lib/utils";
 
 interface Props {
   data: CategorySummary[];
@@ -32,7 +18,7 @@ export default function DiskChart({ data }: Props) {
     value: d.total_size_kb,
     category: d.category,
     count: d.item_count,
-    fill: COLORS[d.category] ?? "#A09080",
+    fill: catColorHex(d.category),
   }));
 
   return (
@@ -90,7 +76,6 @@ export default function DiskChart({ data }: Props) {
         </ResponsiveContainer>
       </div>
 
-      {/* Center label when a slice is selected */}
       {selectedIdx >= 0 && (
         <div className="text-center -mt-20 relative z-10 pointer-events-none">
           <p className="text-sm font-semibold text-foreground">
@@ -102,7 +87,6 @@ export default function DiskChart({ data }: Props) {
         </div>
       )}
 
-      {/* Legend */}
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-2">
         {chartData.map((d, idx) => (
           <button

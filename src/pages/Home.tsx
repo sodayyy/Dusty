@@ -62,7 +62,7 @@ export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | 
               </div>
               <button
                 onClick={() => startUninstall(selectedApp)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-destructive text-white text-sm font-medium hover:opacity-90 transition-opacity shrink-0"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-destructive text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity shrink-0"
               >
                 <Trash2 className="w-4 h-4" />
                 深度卸载

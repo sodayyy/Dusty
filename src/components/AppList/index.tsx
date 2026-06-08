@@ -2,15 +2,7 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Package, ChevronRight, Loader2 } from "lucide-react";
 import { useAppStore } from "@/store";
-import { cn } from "@/lib/utils";
-
-function formatSize(kb: number): string {
-  if (kb === 0) return "";
-  if (kb < 1024) return `${kb} KB`;
-  const mb = kb / 1024;
-  if (mb < 1024) return `${mb.toFixed(0)} MB`;
-  return `${(mb / 1024).toFixed(1)} GB`;
-}
+import { cn, formatSize } from "@/lib/utils";
 
 export default function AppList() {
   const { apps, loading, error, selectedApp, searchQuery, fetchApps, selectApp, setSearchQuery, filteredApps } =

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, CheckCircle, AlertTriangle } from "lucide-react";
 import { useAppStore } from "@/store";
 import ScanResult from "@/components/ScanResult";
+import { formatSize } from "@/lib/utils";
 
 export default function Uninstall() {
   const {
@@ -191,13 +192,6 @@ function ReviewStep({
   onStage: () => void;
   error: string | null;
 }) {
-  const fmtSize = (kb: number): string => {
-    if (kb < 1024) return `${kb} KB`;
-    const mb = kb / 1024;
-    if (mb < 1024) return `${mb.toFixed(0)} MB`;
-    return `${(mb / 1024).toFixed(1)} GB`;
-  };
-
   return (
     <div className="pt-4 space-y-4">
       {/* Uninstall result banner */}
@@ -227,7 +221,7 @@ function ReviewStep({
       <div className="sticky bottom-0 bg-background pt-3 border-t border-border">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs text-muted-foreground">
-            已选 {selectedCount} 项 · 共 {fmtSize(totalSize)}
+            已选 {selectedCount} 项 · 共 {formatSize(totalSize)}
           </span>
         </div>
 
@@ -262,13 +256,6 @@ function DoneStep({
   totalSize: number;
   onDone: () => void;
 }) {
-  const fmtSize = (kb: number): string => {
-    if (kb < 1024) return `${kb} KB`;
-    const mb = kb / 1024;
-    if (mb < 1024) return `${mb.toFixed(0)} MB`;
-    return `${(mb / 1024).toFixed(1)} GB`;
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -284,7 +271,7 @@ function DoneStep({
           {softwareName} 的 {selectedCount} 个残留已扫进垃圾桶
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          释放空间约 {fmtSize(totalSize)}，7天后自动清除
+          释放空间约 {formatSize(totalSize)}，7天后自动清除
         </p>
       </div>
       <button

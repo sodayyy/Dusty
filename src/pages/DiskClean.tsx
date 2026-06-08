@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, HardDrive } from "lucide-react";
 import { scanClassified, getDefaultScanPaths, type CategorySummaryList } from "@/lib/tauri-commands";
 import DiskChart from "@/components/DiskChart";
+import { catColorHex } from "@/lib/colors";
+import { formatSize } from "@/lib/utils";
 
 export default function DiskClean({ onBack }: { onBack: () => void }) {
   const [data, setData] = useState<CategorySummaryList | null>(null);
@@ -22,13 +24,6 @@ export default function DiskClean({ onBack }: { onBack: () => void }) {
       }
     })();
   }, []);
-
-  const formatSize = (kb: number): string => {
-    if (kb < 1024) return `${kb} KB`;
-    const mb = kb / 1024;
-    if (mb < 1024) return `${mb.toFixed(0)} MB`;
-    return `${(mb / 1024).toFixed(1)} GB`;
-  };
 
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto">
@@ -95,10 +90,8 @@ export default function DiskClean({ onBack }: { onBack: () => void }) {
             animate={{ opacity: 1 }}
             className="space-y-5 pt-4"
           >
-            {/* Pie chart */}
             <DiskChart data={data.summaries} totalSize={data.total_size_kb} />
 
-            {/* Category list */}
             <div className="space-y-2">
               <h3 className="text-xs font-medium text-muted-foreground px-1">
                 分类明细
@@ -110,7 +103,7 @@ export default function DiskClean({ onBack }: { onBack: () => void }) {
                 >
                   <div
                     className="w-3 h-3 rounded-full shrink-0"
-                    style={{ backgroundColor: catColor(cat.category) }}
+                    style={{ backgroundColor: catColorHex(cat.category) }}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground">
@@ -129,7 +122,7 @@ export default function DiskClean({ onBack }: { onBack: () => void }) {
                         className="h-full rounded-full"
                         style={{
                           width: `${data.total_size_kb > 0 ? (cat.total_size_kb / data.total_size_kb) * 100 : 0}%`,
-                          backgroundColor: catColor(cat.category),
+                          backgroundColor: catColorHex(cat.category),
                         }}
                       />
                     </div>
@@ -142,16 +135,4 @@ export default function DiskClean({ onBack }: { onBack: () => void }) {
       </main>
     </div>
   );
-}
-
-function catColor(category: string): string {
-  const colors: Record<string, string> = {
-    software: "#4A90D9",
-    system: "#E07060",
-    cache: "#6DBF9E",
-    documents: "#F0C070",
-    installer: "#E8A87C",
-    other: "#A09080",
-  };
-  return colors[category] ?? "#A09080";
 }
