@@ -29,7 +29,7 @@ export default function Uninstall() {
 
   if (!selectedApp) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-3 px-4">
+      <div className="flex flex-col items-center justify-center h-screen gap-3 px-4 bg-background">
         <p className="text-muted-foreground text-sm">没有选中的软件</p>
         <Button
           variant="link"
@@ -48,7 +48,7 @@ export default function Uninstall() {
       .reduce((sum, r) => sum + r.size_kb, 0) ?? 0;
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto">
+    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-background">
       {/* Header */}
       <header className="shrink-0 px-4 pt-5 pb-3 flex items-center gap-3">
         <Button

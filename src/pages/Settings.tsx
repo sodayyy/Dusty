@@ -45,7 +45,7 @@ export default function Settings({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto">
+    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-background">
       <header className="shrink-0 px-4 pt-5 pb-3 flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />

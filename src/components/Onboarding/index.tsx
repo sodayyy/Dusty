@@ -15,21 +15,21 @@ export function markOnboarded(): void {
 
 const STEPS = [
   {
-    title: "Hi! I'm Dusty",
-    subtitle: "Your cleanup buddy~",
-    body: "Let's first check what's on your disk. I can help you find files to clean up safely.",
+    title: "嗨！我是 Dusty",
+    subtitle: "你的专属清洁工～",
+    body: "先来看看磁盘里有什么吧！我会帮你找到可以安全清理的文件。",
     emoji: "🧹",
   },
   {
-    title: "Know Your Apps",
-    subtitle: "Find unused software",
-    body: "I've scanned all your installed apps. Pick anything you don't need, and I'll handle the deep cleaning.",
+    title: "认识你的软件",
+    subtitle: "找找不需要的应用",
+    body: "我已经列出了所有已安装的软件。挑出不想要的，剩下的深度清理交给我就好。",
     emoji: "📋",
   },
   {
-    title: "Ready to Sweep!",
-    subtitle: "Let's start cleaning",
-    body: "You can always undo within 7 days. Everything goes to a safe holding area first.",
+    title: "准备好了吗？",
+    subtitle: "清扫开始！",
+    body: "别担心，所有删除的内容都会先放进暂存区，7天内随时可以还原～",
     emoji: "✨",
   },
 ];
@@ -60,46 +60,50 @@ export default function Onboarding({ onFinish }: Props) {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -40 }}
           transition={{ duration: 0.3 }}
-          className="flex flex-col items-center text-center max-w-sm"
+          className="flex flex-col items-center text-center w-full max-w-sm"
         >
-          {/* Emoji + progress dots */}
-          <p className="text-5xl mb-6">{current.emoji}</p>
+          {/* Emoji */}
+          <p className="text-6xl mb-8">{current.emoji}</p>
 
-          <div className="flex gap-1.5 mb-8">
+          {/* Progress dots */}
+          <div className="flex gap-2 mb-8">
             {STEPS.map((_, i) => (
               <div
                 key={i}
-                className={`w-2 h-2 rounded-full transition-colors ${
+                className={`w-2.5 h-2.5 rounded-full transition-colors ${
                   i === step ? "bg-primary" : "bg-muted"
                 }`}
               />
             ))}
           </div>
 
-          <h2 className="text-xl font-semibold text-foreground mb-1">
-            {current.title}
-          </h2>
-          <p className="text-xs text-primary mb-3">{current.subtitle}</p>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {current.body}
-          </p>
+          {/* Card */}
+          <div className="bg-card border border-border rounded-2xl p-6 w-full mb-8">
+            <h2 className="text-lg font-semibold text-foreground mb-1">
+              {current.title}
+            </h2>
+            <p className="text-sm text-primary mb-3">{current.subtitle}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {current.body}
+            </p>
+          </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Bottom action bar */}
-      <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-4 bg-gradient-to-t from-background to-transparent flex items-center justify-between max-w-sm mx-auto">
+      {/* Bottom actions */}
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background to-transparent flex items-center justify-between max-w-sm mx-auto w-full">
         {step > 0 ? (
           <Button variant="ghost" size="sm" onClick={() => setStep(step - 1)}>
-            <ChevronLeft /> Back
+            <ChevronLeft /> 上一步
           </Button>
         ) : (
           <div />
         )}
-        <Button onClick={handleNext} className="rounded-xl">
+        <Button onClick={handleNext} className="rounded-xl min-w-[120px]">
           {step < STEPS.length - 1 ? (
-            <>Next <ChevronRight /></>
+            <>下一步 <ChevronRight /></>
           ) : (
-            "Get Started"
+            "开始使用"
           )}
         </Button>
       </div>

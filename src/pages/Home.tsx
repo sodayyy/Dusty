@@ -10,7 +10,7 @@ export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | 
   const flowError = useAppStore((s) => s.flowError);
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto">
+    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-background">
       {/* Header */}
       <header className="shrink-0 px-4 pt-5 pb-3 flex items-center justify-between">
         <div>
