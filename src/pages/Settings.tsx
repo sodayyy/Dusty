@@ -7,16 +7,25 @@ export default function Settings({ onBack }: { onBack: () => void }) {
   const [showKey, setShowKey] = useState(false);
   const [saved, setSaved] = useState(false);
   const [hasKey, setHasKey] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
-    hasApiKey().then(setHasKey);
+    hasApiKey()
+      .then(setHasKey)
+      .finally(() => setChecking(false));
   }, []);
 
   const handleSave = async () => {
-    await saveApiKey(key.trim());
-    setHasKey(key.trim().length > 0);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setSaveError(null);
+    try {
+      await saveApiKey(key.trim());
+      setHasKey(key.trim().length > 0);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (e) {
+      setSaveError(String(e));
+    }
   };
 
   return (
@@ -83,9 +92,17 @@ export default function Settings({ onBack }: { onBack: () => void }) {
             </button>
           </div>
 
-          {hasKey && !key && (
+          {checking ? (
+            <p className="text-xs text-muted-foreground">读取中…</p>
+          ) : hasKey && !key ? (
             <p className="text-xs text-chart-2">
               API Key is configured. AI features are enabled.
+            </p>
+          ) : null}
+
+          {saveError && (
+            <p className="text-xs text-destructive">
+              Save failed: {saveError}
             </p>
           )}
         </div>

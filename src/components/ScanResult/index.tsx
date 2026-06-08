@@ -9,6 +9,8 @@ import {
   Monitor,
   CheckSquare,
   Square,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import type { ResidueItem } from "@/lib/tauri-commands";
 
@@ -43,8 +45,42 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
   other: FileText,
 };
 
-export default function ScanResult() {
-  const { residues, selectedResiduePaths, toggleResidue } = useAppStore();
+interface Props {
+  loading?: boolean;
+  onRetry?: () => void;
+}
+
+export default function ScanResult({ loading, onRetry }: Props) {
+  const { residues, selectedResiduePaths, toggleResidue, flowError } =
+    useAppStore();
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-2">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+        <p className="text-sm text-muted-foreground">正在扫描残留…</p>
+      </div>
+    );
+  }
+
+  if (flowError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-3">
+        <AlertTriangle className="w-8 h-8 text-danger/60" />
+        <p className="text-sm text-destructive text-center max-w-xs">
+          扫描时出了点问题：{flowError}
+        </p>
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:opacity-90 transition-opacity"
+          >
+            重试
+          </button>
+        )}
+      </div>
+    );
+  }
 
   if (!residues || residues.items.length === 0) {
     return (
@@ -95,7 +131,6 @@ function ResidueCard({
           : "bg-card/50 border-transparent hover:bg-card"
       )}
     >
-      {/* Checkbox */}
       <div className="mt-0.5 shrink-0">
         {selected ? (
           <CheckSquare className="w-4 h-4 text-primary" />
@@ -104,12 +139,10 @@ function ResidueCard({
         )}
       </div>
 
-      {/* Icon */}
       <div className={cn("p-1.5 rounded-lg shrink-0", safety.bg)}>
         <Icon className={cn("w-4 h-4", safety.text)} />
       </div>
 
-      {/* Content */}
       <div className="flex-1 min-w-0">
         <p className="text-xs text-foreground truncate">{item.description}</p>
         <p className="text-[10px] text-muted-foreground truncate mt-0.5">
@@ -117,7 +150,6 @@ function ResidueCard({
         </p>
       </div>
 
-      {/* Safety badge */}
       <div className="shrink-0 mt-0.5">
         <span
           className={cn(

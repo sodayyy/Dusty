@@ -85,6 +85,17 @@ export default function Uninstall() {
             <LoadingStep message="正在扫描残留文件…" sub="检查注册表、文件和系统项" />
           )}
 
+        {/* Phase: review — error (scan failed, no residues) */}
+        {uninstallPhase === "review" && !residues && (
+          <ErrorRecoveryStep
+            message={flowError ?? "扫描未能返回结果"}
+            onRetry={() => {
+              if (selectedApp) scanAfterUninstall(selectedApp);
+            }}
+            onCancel={resetUninstall}
+          />
+        )}
+
         {/* Phase: review residues */}
         {uninstallPhase === "review" && residues && (
           <ReviewStep
@@ -93,13 +104,36 @@ export default function Uninstall() {
             selectedCount={selectedCount}
             totalSize={totalSize}
             onStage={() => moveSelectedToStaging(selectedApp.name)}
+            onScanRetry={() => {
+              if (selectedApp) scanAfterUninstall(selectedApp);
+            }}
             error={flowError}
           />
         )}
 
         {/* Phase: staging (moving) */}
-        {uninstallPhase === "staging" && (
+        {uninstallPhase === "staging" && !flowError && (
           <LoadingStep message="正在移入暂存区…" sub="文件将在7天后自动清除" />
+        )}
+
+        {/* Phase: staging error */}
+        {uninstallPhase === "staging" && flowError && (
+          <ErrorRecoveryStep
+            message={flowError}
+            onRetry={() => moveSelectedToStaging(selectedApp.name)}
+            onCancel={resetUninstall}
+          />
+        )}
+
+        {/* Phase: uninstalling error (caught mid-flight) */}
+        {uninstallPhase === "uninstalling" && flowError && (
+          <ErrorRecoveryStep
+            message={flowError}
+            onRetry={() => {
+              if (selectedApp) startUninstall(selectedApp);
+            }}
+            onCancel={resetUninstall}
+          />
         )}
 
         {/* Phase: done */}
@@ -183,6 +217,7 @@ function ReviewStep({
   selectedCount,
   totalSize,
   onStage,
+  onScanRetry,
   error,
 }: {
   residues: { items: { path: string; safety: string }[]; total_items: number; registry_count: number; file_count: number; system_count: number };
@@ -190,6 +225,7 @@ function ReviewStep({
   selectedCount: number;
   totalSize: number;
   onStage: () => void;
+  onScanRetry: () => void;
   error: string | null;
 }) {
   return (
@@ -215,7 +251,7 @@ function ReviewStep({
       </div>
 
       {/* Residue list */}
-      <ScanResult />
+      <ScanResult onRetry={onScanRetry} />
 
       {/* Bottom action bar */}
       <div className="sticky bottom-0 bg-background pt-3 border-t border-border">
@@ -242,6 +278,46 @@ function ReviewStep({
         </button>
       </div>
     </div>
+  );
+}
+
+function ErrorRecoveryStep({
+  message,
+  onRetry,
+  onCancel,
+}: {
+  message: string;
+  onRetry: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col items-center justify-center pt-16 gap-4"
+    >
+      <p className="text-3xl">😥</p>
+      <div className="text-center space-y-1">
+        <p className="text-sm font-medium text-foreground">呜，出了点问题…</p>
+        <p className="text-xs text-muted-foreground max-w-xs text-center">
+          {message}
+        </p>
+      </div>
+      <div className="flex gap-3 mt-2">
+        <button
+          onClick={onRetry}
+          className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+          重试
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-6 py-2 rounded-xl bg-muted text-muted-foreground text-sm hover:opacity-90 transition-opacity"
+        >
+          取消
+        </button>
+      </div>
+    </motion.div>
   );
 }
 

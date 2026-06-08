@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, PieChart, Settings } from "lucide-react";
+import { Trash2, PieChart, Settings, AlertTriangle } from "lucide-react";
 import AppList from "@/components/AppList";
 import { useAppStore } from "@/store";
 
 export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | "settings") => void }) {
   const selectedApp = useAppStore((s) => s.selectedApp);
   const startUninstall = useAppStore((s) => s.startUninstall);
+  const flowError = useAppStore((s) => s.flowError);
 
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto">
@@ -49,6 +50,11 @@ export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | 
             transition={{ type: "spring", stiffness: 400, damping: 40 }}
             className="shrink-0 px-4 pb-5 pt-3 border-t border-border bg-background"
           >
+            {flowError && (
+              <p className="text-xs text-destructive mb-2 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> {flowError}
+              </p>
+            )}
             <div className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">
