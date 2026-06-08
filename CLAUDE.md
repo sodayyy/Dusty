@@ -43,7 +43,7 @@
 
 ## 四、Phase 5 约束（UI 精修阶段）
 
-1. **颜色只引用变量**：所有色值只能从 `src/theme.ts` 引用，禁止硬编码任何颜色值
+1. **颜色只用语义 token**：所有色值只能用 `src/index.css` 中已注册的 Tailwind 语义 class（`bg-primary` / `text-foreground` / `bg-destructive` / `bg-safe` / `bg-warn` / `bg-danger` 等），禁止使用 `bg-[#xxx]` / `text-[#xxx]` arbitrary values 和任何内联 `style` 色值
 2. **改前先列计划**：修改任何页面/组件前，先列出改动文件、内容、理由，等用户确认
 3. **Core/Engine 只读**：`src/core/` 和 `src/engine/` 下的文件不得改动
 4. **吉祥物 SVG 搁置**：遇到吉祥物相关任务，停下来提示用户，不自行生成
