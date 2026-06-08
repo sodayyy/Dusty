@@ -4,14 +4,17 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { CategorySummary } from "@/lib/tauri-commands";
 import { catColorHex } from "@/lib/colors";
 import { formatSize } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   data: CategorySummary[];
   totalSize: number;
+  drilledCategory?: string | null;
+  onDrill?: (category: string) => void;
 }
 
-export default function DiskChart({ data }: Props) {
-  const [selectedIdx, setSelectedIdx] = useState<number>(-1);
+export default function DiskChart({ data, drilledCategory, onDrill }: Props) {
+  const [hoverIdx, setHoverIdx] = useState<number>(-1);
 
   const chartData = data.map((d) => ({
     name: d.category_cn,
@@ -20,6 +23,11 @@ export default function DiskChart({ data }: Props) {
     count: d.item_count,
     fill: catColorHex(d.category),
   }));
+
+  const drillIdx = drilledCategory
+    ? chartData.findIndex((d) => d.category === drilledCategory)
+    : -1;
+  const selectedIdx = drillIdx >= 0 ? drillIdx : hoverIdx;
 
   return (
     <motion.div
@@ -89,19 +97,23 @@ export default function DiskChart({ data }: Props) {
 
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-2">
         {chartData.map((d, idx) => (
-          <button
+          <Button
             key={d.category}
-            onClick={() => setSelectedIdx(selectedIdx === idx ? -1 : idx)}
-            onMouseEnter={() => setSelectedIdx(idx)}
-            onMouseLeave={() => setSelectedIdx(-1)}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            variant="ghost"
+            size="xs"
+            onClick={() => {
+              onDrill?.(d.category);
+              setHoverIdx(selectedIdx === idx ? -1 : idx);
+            }}
+            onMouseEnter={() => setHoverIdx(idx)}
+            onMouseLeave={() => setHoverIdx(-1)}
           >
             <div
               className="w-2.5 h-2.5 rounded-full shrink-0"
               style={{ backgroundColor: d.fill }}
             />
             {d.name}
-          </button>
+          </Button>
         ))}
       </div>
     </motion.div>

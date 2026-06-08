@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Key, Eye, EyeOff, Check } from "lucide-react";
-import { saveApiKey, hasApiKey } from "@/lib/ai-client";
+import { saveApiKey, hasApiKey, verifyApiKey } from "@/lib/ai-client";
+import { Button } from "@/components/ui/button";
 
 export default function Settings({ onBack }: { onBack: () => void }) {
   const [key, setKey] = useState("");
@@ -9,6 +10,8 @@ export default function Settings({ onBack }: { onBack: () => void }) {
   const [hasKey, setHasKey] = useState(false);
   const [checking, setChecking] = useState(true);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
   useEffect(() => {
     hasApiKey()
@@ -28,15 +31,25 @@ export default function Settings({ onBack }: { onBack: () => void }) {
     }
   };
 
+  const handleVerify = async () => {
+    setVerifyResult(null);
+    setVerifying(true);
+    try {
+      await verifyApiKey(key.trim() || undefined);
+      setVerifyResult({ ok: true, msg: "Key is valid" });
+    } catch (e) {
+      setVerifyResult({ ok: false, msg: String(e) });
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto">
       <header className="shrink-0 px-4 pt-5 pb-3 flex items-center gap-3">
-        <button
-          onClick={onBack}
-          className="p-1.5 rounded-lg hover:bg-muted transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-        </button>
+        <Button variant="ghost" size="icon" onClick={onBack}>
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
         <h1 className="text-lg font-semibold text-foreground">Settings</h1>
       </header>
 
@@ -77,19 +90,21 @@ export default function Settings({ onBack }: { onBack: () => void }) {
                 )}
               </button>
             </div>
-            <button
+            <Button
               onClick={handleSave}
               disabled={!key.trim()}
-              className="px-4 h-10 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-40 transition-opacity flex items-center gap-1.5"
+              className="rounded-xl"
             >
-              {saved ? (
-                <>
-                  <Check className="w-4 h-4" /> Saved
-                </>
-              ) : (
-                "Save"
-              )}
-            </button>
+              {saved ? <><Check /> Saved</> : "Save"}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={handleVerify}
+              disabled={!key.trim() || verifying}
+              className="rounded-xl"
+            >
+              {verifying ? "Verifying…" : "Verify"}
+            </Button>
           </div>
 
           {checking ? (
@@ -103,6 +118,16 @@ export default function Settings({ onBack }: { onBack: () => void }) {
           {saveError && (
             <p className="text-xs text-destructive">
               Save failed: {saveError}
+            </p>
+          )}
+
+          {verifyResult && (
+            <p
+              className={`text-xs ${
+                verifyResult.ok ? "text-safe" : "text-destructive"
+              }`}
+            >
+              {verifyResult.ok ? "Key is valid" : verifyResult.msg}
             </p>
           )}
         </div>

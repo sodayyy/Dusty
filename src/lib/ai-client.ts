@@ -19,6 +19,32 @@ export async function hasApiKey(): Promise<boolean> {
   return key !== null && key.trim().length > 0;
 }
 
+export async function verifyApiKey(key?: string): Promise<string> {
+  const k = key ?? (await getApiKey());
+  if (!k?.trim()) throw new Error("No API Key provided");
+
+  const res = await fetch(`${DEEPSEEK_BASE}/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${k}`,
+    },
+    body: JSON.stringify({
+      model: "deepseek-chat",
+      messages: [{ role: "user", content: "hi" }],
+      max_tokens: 1,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    if (res.status === 401) throw new Error("API Key is invalid (401 Unauthorized)");
+    throw new Error(`Verification failed: ${res.status} ${err.slice(0, 100)}`);
+  }
+
+  return "Key verified successfully";
+}
+
 async function callDeepseek(
   messages: { role: string; content: string }[],
   temperature = 0.3

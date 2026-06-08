@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, PieChart, Settings, AlertTriangle } from "lucide-react";
 import AppList from "@/components/AppList";
 import { useAppStore } from "@/store";
+import { Button } from "@/components/ui/button";
 
 export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | "settings") => void }) {
   const selectedApp = useAppStore((s) => s.selectedApp);
@@ -19,19 +20,20 @@ export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | 
           <p className="text-xs text-muted-foreground mt-0.5">你的专属 Windows 清洁工</p>
         </div>
         <div className="flex items-center gap-1.5">
-          <button
+          <Button
+            variant="outline"
+            size="xs"
             onClick={() => onNavigate("diskclean")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            <PieChart className="w-3.5 h-3.5" />
-            磁盘分析
-          </button>
-          <button
+            <PieChart /> 磁盘分析
+          </Button>
+          <Button
+            variant="outline"
+            size="xs"
             onClick={() => onNavigate("settings")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            <Settings className="w-3.5 h-3.5" />
-          </button>
+            <Settings />
+          </Button>
         </div>
       </header>
 
@@ -66,13 +68,14 @@ export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | 
                   </p>
                 )}
               </div>
-              <button
+              <Button
+                variant="destructive"
+                size="lg"
                 onClick={() => startUninstall(selectedApp)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-destructive text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity shrink-0"
+                className="rounded-xl text-primary-foreground"
               >
-                <Trash2 className="w-4 h-4" />
-                深度卸载
-              </button>
+                <Trash2 /> 深度卸载
+              </Button>
             </div>
           </motion.footer>
         )}

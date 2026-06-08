@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, CheckCircle, AlertTriangle } from "lucide-react";
 import { useAppStore } from "@/store";
 import ScanResult from "@/components/ScanResult";
 import { formatSize } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export default function Uninstall() {
   const {
@@ -30,12 +31,12 @@ export default function Uninstall() {
     return (
       <div className="flex flex-col items-center justify-center h-screen gap-3 px-4">
         <p className="text-muted-foreground text-sm">没有选中的软件</p>
-        <button
+        <Button
+          variant="link"
           onClick={resetUninstall}
-          className="text-sm text-primary underline"
         >
           返回列表
-        </button>
+        </Button>
       </div>
     );
   }
@@ -50,12 +51,13 @@ export default function Uninstall() {
     <div className="flex flex-col h-screen max-w-2xl mx-auto">
       {/* Header */}
       <header className="shrink-0 px-4 pt-5 pb-3 flex items-center gap-3">
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={resetUninstall}
-          className="p-1.5 rounded-lg hover:bg-muted transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-        </button>
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
         <div className="flex-1 min-w-0">
           <h1 className="text-lg font-semibold text-foreground truncate">
             {selectedApp.name}
@@ -185,12 +187,12 @@ function ConfirmStep({
         </div>
       )}
 
-      <button
+      <Button
         onClick={onStart}
-        className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity"
+        className="w-full py-3 rounded-xl"
       >
         开始深度卸载
-      </button>
+      </Button>
     </div>
   );
 }
@@ -267,15 +269,15 @@ function ReviewStep({
           </div>
         )}
 
-        <button
+        <Button
           onClick={onStage}
           disabled={selectedCount === 0}
-          className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 disabled:opacity-40 transition-opacity"
+          className="w-full py-3 rounded-xl"
         >
           {selectedCount === 0
             ? "请选择要清理的残留"
             : `移入暂存区 (${selectedCount}项)`}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -304,18 +306,19 @@ function ErrorRecoveryStep({
         </p>
       </div>
       <div className="flex gap-3 mt-2">
-        <button
+        <Button
           onClick={onRetry}
-          className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+          className="rounded-xl"
         >
           重试
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="secondary"
           onClick={onCancel}
-          className="px-6 py-2 rounded-xl bg-muted text-muted-foreground text-sm hover:opacity-90 transition-opacity"
+          className="rounded-xl"
         >
           取消
-        </button>
+        </Button>
       </div>
     </motion.div>
   );
@@ -350,12 +353,12 @@ function DoneStep({
           释放空间约 {formatSize(totalSize)}，7天后自动清除
         </p>
       </div>
-      <button
+      <Button
         onClick={onDone}
-        className="mt-4 px-8 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+        className="mt-4 px-8 rounded-xl"
       >
         完成
-      </button>
+      </Button>
     </motion.div>
   );
 }
@@ -373,7 +376,7 @@ function StatBadge({ label, count }: { label: string; count: number }) {
   return (
     <div className="bg-card border border-border rounded-xl px-3 py-2.5 text-center">
       <div className="text-lg font-semibold text-foreground">{count}</div>
-      <div className="text-[10px] text-muted-foreground">{label}</div>
+      <div className="text-2xs text-muted-foreground">{label}</div>
     </div>
   );
 }

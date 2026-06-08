@@ -4,6 +4,7 @@ import Uninstall from "@/pages/Uninstall";
 import DiskClean from "@/pages/DiskClean";
 import Settings from "@/pages/Settings";
 import ChatBubble from "@/components/ChatBubble";
+import Onboarding, { hasOnboarded } from "@/components/Onboarding";
 import { useAppStore } from "@/store";
 
 type Page = "home" | "diskclean" | "settings";
@@ -11,6 +12,11 @@ type Page = "home" | "diskclean" | "settings";
 function App() {
   const uninstallPhase = useAppStore((s) => s.uninstallPhase);
   const [page, setPage] = useState<Page>("home");
+  const [onboardingDone, setOnboardingDone] = useState(hasOnboarded());
+
+  if (!onboardingDone) {
+    return <Onboarding onFinish={() => setOnboardingDone(true)} />;
+  }
 
   if (uninstallPhase !== "idle") {
     return (

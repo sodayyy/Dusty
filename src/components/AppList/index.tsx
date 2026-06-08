@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Package, ChevronRight, Loader2 } from "lucide-react";
 import { useAppStore } from "@/store";
 import { cn, formatSize } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export default function AppList() {
   const { apps, loading, error, selectedApp, searchQuery, fetchApps, selectApp, setSearchQuery, filteredApps } =
@@ -54,12 +55,9 @@ export default function AppList() {
         {error && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <p className="text-sm text-destructive">读取失败：{error}</p>
-            <button
-              onClick={() => fetchApps()}
-              className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm"
-            >
+            <Button onClick={() => fetchApps()} className="rounded-lg">
               重试
-            </button>
+            </Button>
           </div>
         )}
 

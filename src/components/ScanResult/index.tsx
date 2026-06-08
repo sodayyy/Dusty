@@ -145,7 +145,7 @@ function ResidueCard({
 
       <div className="flex-1 min-w-0">
         <p className="text-xs text-foreground truncate">{item.description}</p>
-        <p className="text-[10px] text-muted-foreground truncate mt-0.5">
+        <p className="text-2xs text-muted-foreground truncate mt-0.5">
           {item.path}
         </p>
       </div>
@@ -153,7 +153,7 @@ function ResidueCard({
       <div className="shrink-0 mt-0.5">
         <span
           className={cn(
-            "px-1.5 py-0.5 rounded text-[10px] font-medium",
+            "px-1.5 py-0.5 rounded text-2xs font-medium",
             safety.bg,
             safety.text
           )}

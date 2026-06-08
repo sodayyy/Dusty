@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { dustyChat, hasApiKey, SUGGESTED_QUESTIONS } from "@/lib/ai-client";
 import { useAppStore } from "@/store";
+import { Button } from "@/components/ui/button";
 
 interface Message {
   role: "user" | "assistant";
@@ -94,7 +95,7 @@ export default function ChatBubble() {
               <span className="text-base">🧹</span>
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">Dusty</p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-2xs text-muted-foreground">
                   Your cleanup assistant
                 </p>
               </div>
@@ -112,13 +113,15 @@ export default function ChatBubble() {
                   </p>
                   <div className="mt-4 space-y-1.5">
                     {questions.map((q) => (
-                      <button
+                      <Button
                         key={q}
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleSend(q)}
-                        className="block w-full text-left px-3 py-2 rounded-lg bg-muted/50 text-xs text-foreground hover:bg-muted transition-colors"
+                        className="w-full justify-start text-xs"
                       >
                         {q}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -165,13 +168,13 @@ export default function ChatBubble() {
                 placeholder="Ask Dusty..."
                 className="flex-1 h-9 px-3 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:ring-1 focus:ring-primary/30"
               />
-              <button
+              <Button
+                size="icon"
                 onClick={() => handleSend()}
                 disabled={!input.trim() || loading}
-                className="w-9 h-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 disabled:opacity-40 transition-opacity"
               >
-                <Send className="w-4 h-4" />
-              </button>
+                <Send />
+              </Button>
             </div>
           </motion.div>
         )}
