@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Search, Package, ChevronRight, Loader2 } from "lucide-react";
 import { useAppStore } from "@/store";
 import { cn, formatSize } from "@/lib/utils";
@@ -72,7 +72,6 @@ export default function AppList() {
         {/* App grid */}
         {!loading && !error && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            <AnimatePresence>
               {visibleApps.map((app, i) => {
                 const isSelected = selectedApp?.name === app.name;
                 const firstLetter = app.name.trim().charAt(0).toUpperCase();
@@ -84,7 +83,7 @@ export default function AppList() {
                     transition={{ delay: i * 0.01, duration: 0.2 }}
                     onClick={() => selectApp(isSelected ? null : app)}
                     className={cn(
-                      "relative h-24 p-4 rounded-xl text-left transition-all border flex flex-col justify-between overflow-hidden min-w-0",
+                      "relative h-24 p-4 rounded-xl text-left transition-all border flex flex-col justify-between overflow-hidden min-w-0 cursor-pointer",
                       isSelected
                         ? "border-[#E8A87C] bg-[#FFF3E3] ring-1 ring-[#E8A87C]/30"
                         : "bg-[#FFF8EE] border-[#EDE0D0] hover:border-[#E8A87C] hover:shadow-sm"
@@ -124,7 +123,6 @@ export default function AppList() {
                   </motion.button>
                 );
               })}
-            </AnimatePresence>
           </div>
         )}
       </div>

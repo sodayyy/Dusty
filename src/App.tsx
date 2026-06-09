@@ -12,7 +12,9 @@ type Page = "home" | "diskclean" | "settings";
 function App() {
   const uninstallPhase = useAppStore((s) => s.uninstallPhase);
   const [page, setPage] = useState<Page>("home");
-  const [onboardingDone, setOnboardingDone] = useState(hasOnboarded());
+  const [onboardingDone, setOnboardingDone] = useState(
+    import.meta.env.DEV ? false : hasOnboarded()
+  );
 
   if (!onboardingDone) {
     return (
