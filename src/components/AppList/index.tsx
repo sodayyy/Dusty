@@ -26,7 +26,7 @@ export default function AppList() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="搜索软件名称或开发商…"
-          className="w-full h-10 pl-9 pr-4 rounded-xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/60 outline-none focus:ring-2 focus:ring-primary/40 transition-shadow"
+          className="w-full h-10 pl-9 pr-4 rounded-xl bg-[#FFF8EE] border border-[#EDE0D0] text-sm text-foreground placeholder:text-muted-foreground/60 outline-none focus:ring-2 focus:ring-[#E8A87C]/40 transition-shadow"
         />
       </div>
 
@@ -46,7 +46,7 @@ export default function AppList() {
         {/* Loading */}
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 text-primary animate-spin" />
+            <Loader2 className="w-6 h-6 text-[#E8A87C] animate-spin" />
             <span className="ml-2 text-sm text-muted-foreground">正在读取软件列表…</span>
           </div>
         )}
@@ -69,68 +69,55 @@ export default function AppList() {
           </div>
         )}
 
-        {/* App list */}
+        {/* App grid */}
         {!loading && !error && (
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
             <AnimatePresence>
               {visibleApps.map((app, i) => {
                 const isSelected = selectedApp?.name === app.name;
+                const firstLetter = app.name.trim().charAt(0).toUpperCase();
                 return (
                   <motion.button
                     key={app.name}
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.015, duration: 0.25 }}
+                    transition={{ delay: i * 0.01, duration: 0.2 }}
                     onClick={() => selectApp(isSelected ? null : app)}
                     className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all border",
+                      "relative h-28 p-4 rounded-xl text-left transition-all border flex flex-col justify-between",
                       isSelected
-                        ? "bg-primary/15 ring-1 ring-primary/30 border-primary/30"
+                        ? "border-[#E8A87C] bg-[#FFF3E3] ring-1 ring-[#E8A87C]/30"
                         : "bg-[#FFF8EE] border-[#EDE0D0] hover:border-[#E8A87C] hover:shadow-sm"
                     )}
                   >
-                    {/* Avatar */}
-                    <div
-                      className={cn(
-                        "w-9 h-9 rounded-lg flex items-center justify-center text-sm font-semibold shrink-0",
-                        isSelected
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
-                      )}
-                    >
-                      {app.name.charAt(0).toUpperCase()}
-                    </div>
+                    {/* Corner badge */}
+                    <span className="absolute top-2 right-2 text-2xs font-semibold text-muted-foreground/40">
+                      {/[A-Z]/.test(firstLetter) ? firstLetter : "#"}
+                    </span>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {app.name}
+                    {/* Name */}
+                    <p className="text-sm font-semibold text-foreground truncate pr-4">
+                      {app.name}
+                    </p>
+
+                    {/* Publisher + Version */}
+                    <div className="flex-1 flex items-end">
+                      <p className="text-xs text-muted-foreground truncate">
+                        {[app.publisher, app.version ? `v${app.version}` : ""]
+                          .filter(Boolean)
+                          .join(" · ") || "—"}
                       </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        {app.publisher ? (
-                          <span className="text-xs text-muted-foreground truncate">
-                            {app.publisher}
-                          </span>
-                        ) : null}
-                        {app.version ? (
-                          <span className="text-xs text-muted-foreground/70">
-                            v{app.version}
-                          </span>
-                        ) : null}
-                      </div>
                     </div>
 
-                    {/* Size + chevron */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {app.size_kb > 0 && (
-                        <span className="text-xs text-muted-foreground">
-                          {formatSize(app.size_kb)}
-                        </span>
-                      )}
+                    {/* Bottom row */}
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-xs text-muted-foreground">
+                        {app.size_kb > 0 ? formatSize(app.size_kb) : ""}
+                      </span>
                       <ChevronRight
                         className={cn(
-                          "w-4 h-4 text-muted-foreground/40 transition-transform",
-                          isSelected && "rotate-90"
+                          "w-4 h-4 text-muted-foreground/30 transition-transform",
+                          isSelected && "rotate-90 text-[#E8A87C]"
                         )}
                       />
                     </div>
