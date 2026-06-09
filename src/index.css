@@ -128,17 +128,17 @@
   }
   html {
     font-family: var(--font-sans);
-    background-color: var(--background);
-    color: var(--foreground);
   }
-  body {
-    background-color: var(--background);
-    color: var(--foreground);
-    min-height: 100vh;
-  }
-  #root {
-    background-color: var(--background);
-    color: var(--foreground);
-    min-height: 100vh;
-  }
+}
+
+/* Force override for Tailwind v4 variable mapping issue */
+body {
+  background-color: #FAF6EF !important;
+  color: #3D2C1E !important;
+  min-height: 100vh;
+}
+
+#root {
+  background-color: #FAF6EF;
+  min-height: 100vh;
 }
