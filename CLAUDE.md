@@ -44,6 +44,7 @@
 ## 四、Phase 5 约束（UI 精修阶段）
 
 1. **颜色只用语义 token**：所有色值只能用 `src/index.css` 中已注册的 Tailwind 语义 class（`bg-primary` / `text-foreground` / `bg-destructive` / `bg-safe` / `bg-warn` / `bg-danger` 等），禁止使用 `bg-[#xxx]` / `text-[#xxx]` arbitrary values 和任何内联 `style` 色值
+   - **已知例外**：`Home.tsx` 底部操作栏暂用内联 style 硬编码色值（`#FFF8EE` / `#EDE0D0` / `#3D2C1E` / `#E8A87C`），绕过 AnimatePresence 渲染问题，代码内有 TODO 注释标记，待后续统一处理
 2. **改前先列计划**：修改任何页面/组件前，先列出改动文件、内容、理由，等用户确认
 3. **Core/Engine 只读**：`src/core/` 和 `src/engine/` 下的文件不得改动
 4. **吉祥物 SVG 搁置**：遇到吉祥物相关任务，停下来提示用户，不自行生成
@@ -51,10 +52,26 @@
 
 ---
 
-## 五、npm 配置
+## 五、Framer Motion 使用限制
+
+- **允许**：单个元素的 fade / slide / scale 动画（`motion.div` 包裹单个组件）
+- **禁止**：`AnimatePresence` 包裹列表或网格类组件
+  （已知会导致子元素不渲染，根因见 Home.tsx Bug 1 修复记录）
+- 遇到列表动画需求：改用 CSS `transition` + `className` 切换实现
+
+---
+
+## 六、npm 配置
 
 项目根目录已有 `.npmrc`：
 ```
 cache=E:/ClaudeWork/npm-cache
 ```
 所有 npm 命令走此缓存，不得使用默认缓存路径。
+
+---
+
+## 七、技术债备注（已知，暂不处理）
+
+- **Onboarding 持久化**：当前用 `localStorage` 记录首次启动状态，未使用 `tauri-plugin-store`。功能正常，1.x 版本统一持久化方案时一并处理
+- **AppList store 解构**：`useAppStore()` 全量解构无 selector，性能次优，后期优化

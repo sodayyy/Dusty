@@ -39,6 +39,7 @@ export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | 
       </main>
 
       {/* Bottom action bar */}
+      {/* TODO: 换用语义 token class，当前绕过 AnimatePresence 渲染问题 */}
       {selectedApp && (
         <div
           style={{

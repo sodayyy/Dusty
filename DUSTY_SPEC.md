@@ -17,19 +17,22 @@
 
 ## 色板
 
-```css
-:root {
-  --bg-main:      #FAF6EF;  /* 米黄暖白，主背景 */
-  --bg-card:      #FFF8EE;  /* 奶油白，卡片面 */
-  --color-dusty:  #E8A87C;  /* 暖橙，Dusty主色 */
-  --color-safe:   #6DBF9E;  /* 薄荷绿，可删/成功 */
-  --color-warn:   #F0C070;  /* 蜂蜜黄，谨慎 */
-  --color-danger: #E07060;  /* 砖红，禁删/危险确认 */
-  --text-main:    #3D2C1E;  /* 深咖啡，主文字 */
-  --text-muted:   #8A7060;  /* 浅咖啡，次要文字 */
-  --border:       #EDE0D0;  /* 暖米色边框 */
-}
-```
+实际实现使用 Tailwind + shadcn 语义 token，以下为色值定义与 token 对照：
+
+| 用途 | 色值 | Tailwind class | 说明 |
+|------|------|----------------|------|
+| 主背景 | `#FAF6EF` | `bg-background` | 米黄暖白 |
+| 卡片面 | `#FFF8EE` | `bg-card` | 奶油白 |
+| Dusty 主色 | `#E8A87C` | `bg-primary` | 暖橙 |
+| 可删/成功 | `#6DBF9E` | `bg-safe` | 薄荷绿 |
+| 谨慎 | `#F0C070` | `bg-warn` | 蜂蜜黄 |
+| 危险/禁删 | `#E07060` | `bg-danger` | 砖红 |
+| 主文字 | `#3D2C1E` | `text-foreground` | 深咖啡 |
+| 次要文字 | `#8A7060` | `text-muted-foreground` | 浅咖啡 |
+| 边框 | `#EDE0D0` | `border` | 暖米色 |
+
+> token 在 `src/index.css` 中注册，代码中统一使用 class 而非硬编码色值。
+> 已知例外：Home.tsx 底部操作栏暂用硬编码，见 CLAUDE.md 四-1。
 
 ---
 
@@ -52,6 +55,8 @@
 ---
 
 ## 核心动画清单（Framer Motion）
+
+> 注意：`AnimatePresence` 禁止包裹列表/网格类组件，见 CLAUDE.md 五。
 
 | 场景 | 动画描述 |
 |------|----------|
@@ -225,12 +230,15 @@ System Prompt 模板（每次调用必须注入）：
 
 ---
 
-## 规则库更新机制
+## 规则库更新机制（1.x 规划）
 
-- 路径：`rules/` 目录下三个 JSON
+> 当前版本（1.0）不启用远程更新，启动时不发起任何网络请求。
+> 规则库固定使用本地 `rules/` 目录下的 JSON 文件。
+
+后续版本规划：
 - 启动时检查远程版本号（轻量 HTTP GET，失败静默跳过）
 - 有新版本 → 后台下载，下次启动生效
-- 远程地址：待定（Phase 5 配置）
+- 远程托管地址待 1.x 规划时确定
 
 ---
 
