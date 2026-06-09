@@ -29,7 +29,7 @@ export default function Uninstall() {
 
   if (!selectedApp) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-3 px-4 bg-background">
+      <div className="flex flex-col items-center justify-center h-screen gap-3 px-4 bg-[#FAF6EF]">
         <p className="text-muted-foreground text-sm">没有选中的软件</p>
         <Button
           variant="link"
@@ -48,7 +48,7 @@ export default function Uninstall() {
       .reduce((sum, r) => sum + r.size_kb, 0) ?? 0;
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-background">
+    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-[#FAF6EF]">
       {/* Header */}
       <header className="shrink-0 px-4 pt-5 pb-3 flex items-center gap-3">
         <Button
@@ -256,7 +256,7 @@ function ReviewStep({
       <ScanResult onRetry={onScanRetry} />
 
       {/* Bottom action bar */}
-      <div className="sticky bottom-0 bg-background pt-3 border-t border-border">
+      <div className="sticky bottom-0 bg-[#FAF6EF] pt-3 border-t border-border">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs text-muted-foreground">
             已选 {selectedCount} 项 · 共 {formatSize(totalSize)}

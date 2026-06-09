@@ -45,7 +45,7 @@ export default function Settings({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-background">
+    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-[#FAF6EF]">
       <header className="shrink-0 px-4 pt-5 pb-3 flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />
@@ -77,7 +77,7 @@ export default function Settings({ onBack }: { onBack: () => void }) {
                 value={key}
                 onChange={(e) => setKey(e.target.value)}
                 placeholder={hasKey ? "Key saved (hidden)" : "sk-..."}
-                className="w-full h-10 pl-3 pr-9 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full h-10 pl-3 pr-9 rounded-xl bg-[#FAF6EF] border border-border text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:ring-2 focus:ring-primary/30"
               />
               <button
                 onClick={() => setShowKey(!showKey)}

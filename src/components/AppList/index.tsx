@@ -71,7 +71,7 @@ export default function AppList() {
 
         {/* App list */}
         {!loading && !error && (
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-3">
             <AnimatePresence>
               {visibleApps.map((app, i) => {
                 const isSelected = selectedApp?.name === app.name;
@@ -83,10 +83,10 @@ export default function AppList() {
                     transition={{ delay: i * 0.015, duration: 0.25 }}
                     onClick={() => selectApp(isSelected ? null : app)}
                     className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors",
+                      "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all border",
                       isSelected
-                        ? "bg-primary/15 ring-1 ring-primary/30"
-                        : "hover:bg-card/80"
+                        ? "bg-primary/15 ring-1 ring-primary/30 border-primary/30"
+                        : "bg-[#FFF8EE] border-[#EDE0D0] hover:border-[#E8A87C] hover:shadow-sm"
                     )}
                   >
                     {/* Avatar */}

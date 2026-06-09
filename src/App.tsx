@@ -15,15 +15,19 @@ function App() {
   const [onboardingDone, setOnboardingDone] = useState(hasOnboarded());
 
   if (!onboardingDone) {
-    return <Onboarding onFinish={() => setOnboardingDone(true)} />;
+    return (
+      <div style={{ backgroundColor: "#FAF6EF", minHeight: "100vh" }}>
+        <Onboarding onFinish={() => setOnboardingDone(true)} />
+      </div>
+    );
   }
 
   if (uninstallPhase !== "idle") {
     return (
-      <>
+      <div style={{ backgroundColor: "#FAF6EF", minHeight: "100vh" }}>
         <Uninstall />
         <ChatBubble />
-      </>
+      </div>
     );
   }
 
@@ -39,10 +43,10 @@ function App() {
   };
 
   return (
-    <>
+    <div style={{ backgroundColor: "#FAF6EF", minHeight: "100vh" }}>
       {renderPage()}
       <ChatBubble />
-    </>
+    </div>
   );
 }
 

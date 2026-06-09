@@ -10,7 +10,7 @@ export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | 
   const flowError = useAppStore((s) => s.flowError);
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-background">
+    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-[#FAF6EF]">
       {/* Header */}
       <header className="shrink-0 px-4 pt-5 pb-3 flex items-center justify-between">
         <div>
@@ -50,7 +50,7 @@ export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | 
             animate={{ y: 0 }}
             exit={{ y: 80 }}
             transition={{ type: "spring", stiffness: 400, damping: 40 }}
-            className="shrink-0 px-4 pb-5 pt-3 border-t border-border bg-background"
+            className="shrink-0 px-4 pb-5 pt-3 border-t border-border bg-[#FAF6EF]"
           >
             {flowError && (
               <p className="text-xs text-destructive mb-2 flex items-center gap-1">

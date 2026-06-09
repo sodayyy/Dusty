@@ -30,7 +30,7 @@ export default function DiskClean({ onBack }: { onBack: () => void }) {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-background">
+    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-[#FAF6EF]">
       <header className="shrink-0 px-4 pt-5 pb-3 flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />
@@ -171,13 +171,13 @@ export default function DiskClean({ onBack }: { onBack: () => void }) {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-background rounded-xl px-3 py-2.5 text-center">
+                    <div className="bg-[#FAF6EF] rounded-xl px-3 py-2.5 text-center">
                       <p className="text-lg font-semibold text-foreground">
                         {formatSize(drilledData.total_size_kb)}
                       </p>
                       <p className="text-2xs text-muted-foreground">占用空间</p>
                     </div>
-                    <div className="bg-background rounded-xl px-3 py-2.5 text-center">
+                    <div className="bg-[#FAF6EF] rounded-xl px-3 py-2.5 text-center">
                       <p className="text-lg font-semibold text-foreground">
                         {drilledData.item_count}
                       </p>
@@ -185,7 +185,7 @@ export default function DiskClean({ onBack }: { onBack: () => void }) {
                     </div>
                   </div>
 
-                  <div className="bg-background rounded-xl px-4 py-3">
+                  <div className="bg-[#FAF6EF] rounded-xl px-4 py-3">
                     <p className="text-xs text-muted-foreground">
                       此分类包含 {drilledData.item_count} 个项目，建议先预览再决定是否清理。
                     </p>
