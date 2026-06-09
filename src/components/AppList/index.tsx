@@ -19,8 +19,8 @@ export default function AppList() {
   return (
     <div className="flex flex-col h-full">
       {/* Search bar */}
-      <div className="relative px-4 pt-4 pb-2">
-        <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <div className="relative px-6 pt-4 pb-2">
+        <Search className="absolute left-9 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
           value={searchQuery}
@@ -32,7 +32,7 @@ export default function AppList() {
 
       {/* Stats */}
       {!loading && !error && (
-        <div className="px-4 pb-2">
+        <div className="px-6 pb-2">
           <p className="text-xs text-muted-foreground">
             {hasQuery
               ? `找到 ${visibleApps.length} 个匹配`
@@ -42,7 +42,7 @@ export default function AppList() {
       )}
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="flex-1 overflow-y-auto px-6 pb-4">
         {/* Loading */}
         {loading && (
           <div className="flex items-center justify-center py-20">
@@ -71,7 +71,7 @@ export default function AppList() {
 
         {/* App grid */}
         {!loading && !error && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             <AnimatePresence>
               {visibleApps.map((app, i) => {
                 const isSelected = selectedApp?.name === app.name;
@@ -84,7 +84,7 @@ export default function AppList() {
                     transition={{ delay: i * 0.01, duration: 0.2 }}
                     onClick={() => selectApp(isSelected ? null : app)}
                     className={cn(
-                      "relative h-28 p-4 rounded-xl text-left transition-all border flex flex-col justify-between",
+                      "relative h-24 p-4 rounded-xl text-left transition-all border flex flex-col justify-between overflow-hidden min-w-0",
                       isSelected
                         ? "border-[#E8A87C] bg-[#FFF3E3] ring-1 ring-[#E8A87C]/30"
                         : "bg-[#FFF8EE] border-[#EDE0D0] hover:border-[#E8A87C] hover:shadow-sm"
@@ -96,13 +96,13 @@ export default function AppList() {
                     </span>
 
                     {/* Name */}
-                    <p className="text-sm font-semibold text-foreground truncate pr-4">
+                    <p className="text-sm font-semibold text-foreground truncate w-full pr-4">
                       {app.name}
                     </p>
 
                     {/* Publisher + Version */}
-                    <div className="flex-1 flex items-end">
-                      <p className="text-xs text-muted-foreground truncate">
+                    <div className="flex-1 flex items-end overflow-hidden min-w-0">
+                      <p className="text-xs text-muted-foreground truncate w-full">
                         {[app.publisher, app.version ? `v${app.version}` : ""]
                           .filter(Boolean)
                           .join(" · ") || "—"}
