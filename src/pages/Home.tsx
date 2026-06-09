@@ -1,8 +1,6 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, PieChart, Settings, AlertTriangle } from "lucide-react";
+import { PieChart, Settings } from "lucide-react";
 import AppList from "@/components/AppList";
 import { useAppStore } from "@/store";
-import { Button } from "@/components/ui/button";
 
 export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | "settings") => void }) {
   const selectedApp = useAppStore((s) => s.selectedApp);
@@ -20,20 +18,18 @@ export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | 
           <p className="text-xs text-muted-foreground mt-0.5">你的专属 Windows 清洁工</p>
         </div>
         <div className="flex items-center gap-1.5">
-          <Button
-            variant="outline"
-            size="xs"
+          <button
             onClick={() => onNavigate("diskclean")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#EDE0D0] bg-[#FFF8EE] text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            <PieChart /> 磁盘分析
-          </Button>
-          <Button
-            variant="outline"
-            size="xs"
+            <PieChart className="w-3.5 h-3.5" /> 磁盘分析
+          </button>
+          <button
             onClick={() => onNavigate("settings")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#EDE0D0] bg-[#FFF8EE] text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            <Settings />
-          </Button>
+            <Settings className="w-3.5 h-3.5" />
+          </button>
         </div>
       </header>
 
@@ -42,44 +38,47 @@ export default function Home({ onNavigate }: { onNavigate: (page: "diskclean" | 
         <AppList />
       </main>
 
-      {/* Bottom action bar — shown when an app is selected */}
-      <AnimatePresence>
-        {selectedApp && (
-          <motion.footer
-            initial={{ y: 80 }}
-            animate={{ y: 0 }}
-            exit={{ y: 80 }}
-            transition={{ type: "spring", stiffness: 400, damping: 40 }}
-            className="shrink-0 px-4 pb-5 pt-3 border-t border-border bg-[#FAF6EF]"
+      {/* Bottom action bar */}
+      {selectedApp && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 50,
+            background: "#FFF8EE",
+            borderTop: "1px solid #EDE0D0",
+            padding: "12px 24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          {flowError && (
+            <p style={{ color: "#E07060", fontSize: 12, marginBottom: 8 }}>
+              {flowError}
+            </p>
+          )}
+          <span style={{ color: "#3D2C1E", fontSize: 14 }}>
+            已选择：{selectedApp.name}
+          </span>
+          <button
+            onClick={() => startUninstall(selectedApp)}
+            style={{
+              background: "#E8A87C",
+              color: "white",
+              border: "none",
+              borderRadius: 8,
+              padding: "8px 20px",
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
           >
-            {flowError && (
-              <p className="text-xs text-destructive mb-2 flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" /> {flowError}
-              </p>
-            )}
-            <div className="flex items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {selectedApp.name}
-                </p>
-                {selectedApp.publisher && (
-                  <p className="text-xs text-muted-foreground truncate">
-                    {selectedApp.publisher}
-                  </p>
-                )}
-              </div>
-              <Button
-                variant="destructive"
-                size="lg"
-                onClick={() => startUninstall(selectedApp)}
-                className="rounded-xl text-primary-foreground"
-              >
-                <Trash2 /> 深度卸载
-              </Button>
-            </div>
-          </motion.footer>
-        )}
-      </AnimatePresence>
+            深度卸载
+          </button>
+        </div>
+      )}
     </div>
   );
 }

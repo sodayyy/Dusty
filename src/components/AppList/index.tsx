@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { motion } from "framer-motion";
 import { Search, Package, ChevronRight, Loader2 } from "lucide-react";
 import { useAppStore } from "@/store";
 import { cn, formatSize } from "@/lib/utils";
@@ -72,15 +71,12 @@ export default function AppList() {
         {/* App grid */}
         {!loading && !error && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {visibleApps.map((app, i) => {
+              {visibleApps.map((app) => {
                 const isSelected = selectedApp?.name === app.name;
                 const firstLetter = app.name.trim().charAt(0).toUpperCase();
                 return (
-                  <motion.button
+                  <button
                     key={app.name}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.01, duration: 0.2 }}
                     onClick={() => selectApp(isSelected ? null : app)}
                     className={cn(
                       "relative h-24 p-4 rounded-xl text-left transition-all border flex flex-col justify-between overflow-hidden min-w-0 cursor-pointer",
@@ -120,7 +116,7 @@ export default function AppList() {
                         )}
                       />
                     </div>
-                  </motion.button>
+                  </button>
                 );
               })}
           </div>
