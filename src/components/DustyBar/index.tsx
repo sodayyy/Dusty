@@ -121,15 +121,15 @@ export default function DustyBar() {
       style={{
         background: "#FFF8EE",
         borderTop: "0.5px solid #EDE0D0",
-        padding: "7px 10px",
+        padding: "10px 10px",
         display: "flex",
         flexDirection: "column",
-        gap: 5,
+        gap: 8,
         flexShrink: 0,
       }}
     >
       {/* Chips */}
-      <div style={{ display: "flex", gap: 4 }}>
+      <div style={{ display: "flex", gap: 6, height: 28, alignItems: "center" }}>
         {content.chips.map((label) => (
           <button
             key={label}
@@ -138,8 +138,8 @@ export default function DustyBar() {
               background: "#FAF6EF",
               border: "0.5px solid #EDE0D0",
               borderRadius: 10,
-              padding: "2px 8px",
-              fontSize: 9,
+              padding: "4px 10px",
+              fontSize: 10,
               color: "#8A7060",
               cursor: "pointer",
               whiteSpace: "nowrap",
@@ -151,19 +151,19 @@ export default function DustyBar() {
       </div>
 
       {/* Main row: Dusty + Bubble + Right group */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, height: 44 }}>
         {/* Dusty figure */}
         <div
           style={{
-            width: 30,
-            height: 34,
+            width: 36,
+            height: 40,
             background: "#E8A87C",
             borderRadius: "50% 50% 38% 38%",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             color: "white",
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: 500,
             flexShrink: 0,
           }}
@@ -177,8 +177,8 @@ export default function DustyBar() {
             background: "white",
             border: "0.5px solid #EDE0D0",
             borderRadius: "7px 7px 7px 2px",
-            padding: "4px 8px",
-            fontSize: 9,
+            padding: "6px 10px",
+            fontSize: 10,
             color: "#3D2C1E",
             lineHeight: 1.5,
             flex: 1,
@@ -196,14 +196,14 @@ export default function DustyBar() {
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-end",
-            gap: 3,
+            gap: 4,
             flexShrink: 0,
           }}
         >
           {label && (
             <span
               style={{
-                fontSize: 8,
+                fontSize: 10,
                 color: "#8A7060",
                 whiteSpace: "nowrap",
                 maxWidth: 80,
