@@ -1,0 +1,86 @@
+
+<style>
+  .scene { padding: 1rem 0; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+  .win { background: #FAF6EF; border: 0.5px solid #EDE0D0; border-radius: 10px; overflow: hidden; width: 400px; display: flex; flex-direction: column; }
+  .titlebar { background: #FFF8EE; border-bottom: 0.5px solid #EDE0D0; padding: 7px 12px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .titlebar-title { font-size: 11px; font-weight: 500; color: #3D2C1E; }
+  .dots { display: flex; gap: 4px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .body { display: flex; flex: 1; overflow: hidden; }
+
+  .sidebar { width: 44px; background: #FFF3E3; border-right: 0.5px solid #EDE0D0; display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 5px; flex-shrink: 0; }
+  .nav-icon { width: 28px; height: 28px; border-radius: 7px; background: #EDE0D0; display: flex; align-items: center; justify-content: center; }
+  .nav-icon.active { background: #E8A87C; }
+
+  .right { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .content { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
+  .section-title { font-size: 10px; font-weight: 500; color: #3D2C1E; margin-bottom: 2px; }
+  .card-row { background: #FFF8EE; border: 0.5px solid #EDE0D0; border-radius: 6px; padding: 5px 8px; font-size: 10px; color: #3D2C1E; display: flex; align-items: center; justify-content: space-between; }
+  .card-row.sel { border-color: #E8A87C; background: #FFF3E3; }
+  .size { color: #8A7060; font-size: 9px; }
+  .badge { font-size: 8px; padding: 1px 5px; border-radius: 8px; margin-left: 4px; background: #EAF3DE; color: #3B6D11; }
+
+  .bottom { background: #FFF8EE; border-top: 0.5px solid #EDE0D0; padding: 7px 10px; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+  .chip-row { display: flex; gap: 4px; }
+  .chip { background: #FAF6EF; border: 0.5px solid #EDE0D0; border-radius: 10px; padding: 2px 8px; font-size: 9px; color: #8A7060; cursor: pointer; white-space: nowrap; }
+  .main-row { display: flex; align-items: center; gap: 6px; }
+  .dusty-fig { width: 30px; height: 34px; background: #E8A87C; border-radius: 50% 50% 38% 38%; display: flex; align-items: center; justify-content: center; color: white; font-size: 7px; font-weight: 500; flex-shrink: 0; }
+  .bubble { background: white; border: 0.5px solid #EDE0D0; border-radius: 7px 7px 7px 2px; padding: 4px 8px; font-size: 9px; color: #3D2C1E; line-height: 1.5; flex: 1; }
+  .right-group { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+  .sel-label { font-size: 8px; color: #8A7060; white-space: nowrap; }
+  .btn-main { background: #E8A87C; color: white; border: none; border-radius: 6px; padding: 4px 12px; font-size: 9px; font-weight: 500; cursor: pointer; }
+</style>
+
+<h2 class="sr-only">Dusty A1 最终布局，侧边栏贯穿上下，底部气泡栏在内容区</h2>
+
+<div class="scene">
+  <div class="win">
+    <div class="titlebar">
+      <span class="titlebar-title">Dusty 磁盘清理</span>
+      <div class="dots">
+        <span class="dot" style="background:#E07060"></span>
+        <span class="dot" style="background:#F0C070"></span>
+        <span class="dot" style="background:#6DBF9E"></span>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="sidebar">
+        <div class="nav-icon active"><i class="ti ti-home" style="font-size:12px;color:white" aria-hidden="true"></i></div>
+        <div class="nav-icon"><i class="ti ti-trash" style="font-size:12px;color:#8A7060" aria-hidden="true"></i></div>
+        <div class="nav-icon"><i class="ti ti-chart-pie" style="font-size:12px;color:#8A7060" aria-hidden="true"></i></div>
+        <div class="nav-icon"><i class="ti ti-settings" style="font-size:12px;color:#8A7060" aria-hidden="true"></i></div>
+      </div>
+
+      <div class="right">
+        <div class="content">
+          <div class="section-title">已安装软件 · 132个</div>
+          <div class="card-row sel">
+            <span>Google Chrome</span>
+            <span class="size">452 MB<span class="badge">已选</span></span>
+          </div>
+          <div class="card-row">VS Code <span class="size">405 MB</span></div>
+          <div class="card-row">WeChat <span class="size">320 MB</span></div>
+          <div class="card-row">Steam <span class="size">1.2 GB</span></div>
+        </div>
+        <div class="bottom">
+          <div class="chip-row">
+            <span class="chip">这些文件都能删吗？</span>
+            <span class="chip">哪些必须留着？</span>
+            <span class="chip">帮我总结</span>
+          </div>
+          <div class="main-row">
+            <div class="dusty-fig">D</div>
+            <div class="bubble">Chrome 有 238MB 残留，卸载时一起清掉更干净哦～</div>
+            <div class="right-group">
+              <span class="sel-label">已选：Chrome</span>
+              <button class="btn-main">深度卸载</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

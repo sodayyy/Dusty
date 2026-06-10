@@ -1,12 +1,20 @@
 import { useEffect } from "react";
-import { Search, Package, ChevronRight, Loader2 } from "lucide-react";
+import { Search, Loader2, Package } from "lucide-react";
 import { useAppStore } from "@/store";
-import { cn, formatSize } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { formatSize } from "@/lib/utils";
 
 export default function AppList() {
-  const { apps, loading, error, selectedApp, searchQuery, fetchApps, selectApp, setSearchQuery, filteredApps } =
-    useAppStore();
+  const {
+    apps,
+    loading,
+    error,
+    selectedApp,
+    searchQuery,
+    fetchApps,
+    selectApp,
+    setSearchQuery,
+    filteredApps,
+  } = useAppStore();
 
   useEffect(() => {
     fetchApps();
@@ -16,111 +24,191 @@ export default function AppList() {
   const hasQuery = searchQuery.trim().length > 0;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Search bar */}
-      <div className="relative px-6 pt-4 pb-2">
-        <Search className="absolute left-9 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        padding: 8,
+        gap: 5,
+        overflow: "hidden",
+      }}
+    >
+      {/* Search */}
+      <div style={{ position: "relative" }}>
+        <Search
+          style={{
+            position: "absolute",
+            left: 8,
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 12,
+            height: 12,
+            color: "#8A7060",
+          }}
+        />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="搜索软件名称或开发商…"
-          className="w-full h-10 pl-9 pr-4 rounded-xl bg-[#FFF8EE] border border-[#EDE0D0] text-sm text-foreground placeholder:text-muted-foreground/60 outline-none focus:ring-2 focus:ring-[#E8A87C]/40 transition-shadow"
+          placeholder="搜索…"
+          style={{
+            width: "100%",
+            height: 28,
+            paddingLeft: 24,
+            paddingRight: 8,
+            borderRadius: 6,
+            border: "0.5px solid #EDE0D0",
+            background: "#FFF8EE",
+            fontSize: 10,
+            color: "#3D2C1E",
+            outline: "none",
+            boxSizing: "border-box",
+          }}
         />
       </div>
 
-      {/* Stats */}
+      {/* Section title */}
       {!loading && !error && (
-        <div className="px-6 pb-2">
-          <p className="text-xs text-muted-foreground">
-            {hasQuery
-              ? `找到 ${visibleApps.length} 个匹配`
-              : `共 ${apps.length} 个已安装软件`}
-          </p>
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 500,
+            color: "#3D2C1E",
+            marginBottom: 2,
+          }}
+        >
+          {hasQuery
+            ? `搜索结果 · ${visibleApps.length}个`
+            : `已安装软件 · ${apps.length}个`}
         </div>
       )}
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-6 pb-4">
-        {/* Loading */}
+      <div style={{ flex: 1, overflowY: "auto" }}>
         {loading && (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 text-[#E8A87C] animate-spin" />
-            <span className="ml-2 text-sm text-muted-foreground">正在读取软件列表…</span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "40px 0",
+              gap: 6,
+            }}
+          >
+            <Loader2
+              style={{
+                width: 14,
+                height: 14,
+                color: "#E8A87C",
+                animation: "spin 1s linear infinite",
+              }}
+            />
+            <span style={{ fontSize: 10, color: "#8A7060" }}>
+              正在读取…
+            </span>
           </div>
         )}
 
-        {/* Error */}
         {error && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <p className="text-sm text-destructive">读取失败：{error}</p>
-            <Button onClick={() => fetchApps()} className="rounded-lg">
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              padding: "40px 0",
+              gap: 8,
+            }}
+          >
+            <span style={{ fontSize: 10, color: "#E07060" }}>{error}</span>
+            <button
+              onClick={() => fetchApps()}
+              style={{
+                background: "#E8A87C",
+                color: "white",
+                border: "none",
+                borderRadius: 6,
+                padding: "4px 12px",
+                fontSize: 9,
+                cursor: "pointer",
+              }}
+            >
               重试
-            </Button>
+            </button>
           </div>
         )}
 
-        {/* Empty search */}
         {!loading && !error && hasQuery && visibleApps.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 gap-2">
-            <Package className="w-8 h-8 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">没有找到匹配的软件</p>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              padding: "40px 0",
+              gap: 4,
+            }}
+          >
+            <Package style={{ width: 20, height: 20, color: "#EDE0D0" }} />
+            <span style={{ fontSize: 10, color: "#8A7060" }}>无匹配</span>
           </div>
         )}
 
-        {/* App grid */}
-        {!loading && !error && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {visibleApps.map((app) => {
-                const isSelected = selectedApp?.name === app.name;
-                const firstLetter = app.name.trim().charAt(0).toUpperCase();
-                return (
-                  <button
-                    key={app.name}
-                    onClick={() => selectApp(isSelected ? null : app)}
-                    className={cn(
-                      "relative h-24 p-4 rounded-xl text-left transition-all border flex flex-col justify-between overflow-hidden min-w-0 cursor-pointer",
-                      isSelected
-                        ? "border-[#E8A87C] bg-[#FFF3E3] ring-1 ring-[#E8A87C]/30"
-                        : "bg-[#FFF8EE] border-[#EDE0D0] hover:border-[#E8A87C] hover:shadow-sm"
-                    )}
-                  >
-                    {/* Corner badge */}
-                    <span className="absolute top-2 right-2 text-2xs font-semibold text-muted-foreground/40">
-                      {/[A-Z]/.test(firstLetter) ? firstLetter : "#"}
+        {!loading &&
+          !error &&
+          visibleApps.map((app) => {
+            const isSelected = selectedApp?.name === app.name;
+            return (
+              <button
+                key={app.name}
+                onClick={() => selectApp(isSelected ? null : app)}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  background: isSelected ? "#FFF3E3" : "#FFF8EE",
+                  border: `0.5px solid ${isSelected ? "#E8A87C" : "#EDE0D0"}`,
+                  borderRadius: 6,
+                  padding: "5px 8px",
+                  fontSize: 10,
+                  color: "#3D2C1E",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
+                <span
+                  style={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    flex: 1,
+                    marginRight: 8,
+                  }}
+                >
+                  {app.name}
+                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                  <span style={{ color: "#8A7060", fontSize: 9 }}>
+                    {app.size_kb > 0 ? formatSize(app.size_kb) : ""}
+                  </span>
+                  {isSelected && (
+                    <span
+                      style={{
+                        fontSize: 8,
+                        padding: "1px 5px",
+                        borderRadius: 8,
+                        background: "#EAF3DE",
+                        color: "#3B6D11",
+                      }}
+                    >
+                      已选
                     </span>
-
-                    {/* Name */}
-                    <p className="text-sm font-semibold text-foreground truncate w-full pr-4">
-                      {app.name}
-                    </p>
-
-                    {/* Publisher + Version */}
-                    <div className="flex-1 flex items-end overflow-hidden min-w-0">
-                      <p className="text-xs text-muted-foreground truncate w-full">
-                        {[app.publisher, app.version ? `v${app.version}` : ""]
-                          .filter(Boolean)
-                          .join(" · ") || "—"}
-                      </p>
-                    </div>
-
-                    {/* Bottom row */}
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-muted-foreground">
-                        {app.size_kb > 0 ? formatSize(app.size_kb) : ""}
-                      </span>
-                      <ChevronRight
-                        className={cn(
-                          "w-4 h-4 text-muted-foreground/30 transition-transform",
-                          isSelected && "rotate-90 text-[#E8A87C]"
-                        )}
-                      />
-                    </div>
-                  </button>
-                );
-              })}
-          </div>
-        )}
+                  )}
+                </div>
+              </button>
+            );
+          })}
       </div>
     </div>
   );
