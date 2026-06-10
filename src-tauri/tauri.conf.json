@@ -13,10 +13,11 @@
     "windows": [
       {
         "title": "Dusty — 磁盘清理",
-        "width": 1000,
-        "height": 680,
-        "minWidth": 800,
-        "minHeight": 600
+        "width": 900,
+        "height": 640,
+        "resizable": false,
+        "minWidth": 900,
+        "minHeight": 640
       }
     ],
     "security": {
