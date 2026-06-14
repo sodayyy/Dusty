@@ -171,6 +171,154 @@ pub fn classify_path(path: &str) -> FileCategory {
         return FileCategory::Documents;
     }
 
+    // Game directories
+    if lower.contains("\\steamapps\\")
+        || lower.contains("\\steam\\games")
+        || lower.contains("\\games\\")
+        || lower.contains("\\game\\")
+        || lower.contains("\\riot games\\")
+        || lower.contains("\\epic games\\")
+        || lower.contains("\\ubisoft game launcher\\")
+        || lower.contains("\\origin games\\")
+        || lower.contains("\\battle.net\\")
+    {
+        return FileCategory::Software;
+    }
+
+    // AppData / ProgramData app data
+    if lower.contains("\\appdata\\roaming\\")
+        || lower.contains("\\appdata\\local\\")
+        || lower.contains("\\programdata\\")
+    {
+        return FileCategory::Software;
+    }
+
+    // Dev tools
+    if lower.contains("\\.cargo\\")
+        || lower.contains("\\.rustup\\")
+        || lower.contains("\\node_modules\\")
+        || lower.contains("\\.npm\\")
+        || lower.contains("\\.gradle\\")
+        || lower.contains("\\.m2\\")
+        || lower.contains("\\jdk\\")
+        || lower.contains("\\java\\")
+        || lower.contains("\\python\\")
+        || lower.contains("\\conda\\")
+        || lower.contains("\\anaconda\\")
+        || lower.contains("\\miniconda\\")
+    {
+        return FileCategory::Software;
+    }
+
+    // User home standard folders → documents
+    if lower.contains("\\users\\")
+        && (lower.ends_with("\\contacts")
+            || lower.ends_with("\\favorites")
+            || lower.ends_with("\\links")
+            || lower.ends_with("\\saved games")
+            || lower.ends_with("\\searches")
+            || lower.ends_with("\\appdata")
+            || lower.ends_with("\\3d objects"))
+    {
+        return FileCategory::Documents;
+    }
+
+    // VM directories
+    if lower.contains("\\virtualbox vms\\")
+        || lower.contains("\\vmware\\")
+        || lower.contains("\\hyper-v\\")
+        || lower.contains("\\virtual machines\\")
+        || lower.ends_with(".vmdk")
+        || lower.ends_with(".vhd")
+        || lower.ends_with(".vhdx")
+    {
+        return FileCategory::Software;
+    }
+
+    // Dev project directories
+    if lower.contains("\\workspace\\")
+        || lower.contains("\\projects\\")
+        || lower.contains("\\repos\\")
+        || lower.contains("\\source\\")
+        || lower.contains("\\claudework\\")
+        || lower.contains("\\dev\\")
+        || lower.contains("\\code\\")
+        || lower.contains("\\git\\")
+        || lower.contains("\\.git\\")
+        || lower.contains("\\github\\")
+        || lower.contains("\\gitlab\\")
+    {
+        return FileCategory::Software;
+    }
+
+    // Game platform roots
+    if lower.ends_with("\\steam")
+        || lower.ends_with("\\steamlibrary")
+        || lower.ends_with("\\epic games")
+        || lower.ends_with("\\riot games")
+        || lower.ends_with("\\gog galaxy")
+        || lower.ends_with("\\ubisoft game launcher")
+        || lower.ends_with("\\ea games")
+        || lower.ends_with("\\origin")
+        || lower.ends_with("\\battle.net")
+        || lower.ends_with("\\wegame")
+        || lower.ends_with("\\tencent games")
+        || lower.ends_with("\\netease games")
+        || lower.ends_with("\\games")
+        || lower.ends_with("\\game")
+    {
+        return FileCategory::Software;
+    }
+
+    // Common tool / SDK roots
+    if lower.ends_with("\\nodejs")
+        || lower.ends_with("\\python3")
+        || lower.ends_with("\\python39")
+        || lower.ends_with("\\python310")
+        || lower.ends_with("\\python311")
+        || lower.ends_with("\\python312")
+        || lower.ends_with("\\ruby")
+        || lower.ends_with("\\go")
+        || lower.ends_with("\\rust")
+        || lower.ends_with("\\dotnet")
+        || lower.ends_with("\\xampp")
+        || lower.ends_with("\\wamp")
+        || lower.ends_with("\\laragon")
+        || lower.ends_with("\\mysql")
+        || lower.ends_with("\\postgresql")
+        || lower.ends_with("\\mongodb")
+        || lower.ends_with("\\redis")
+        || lower.ends_with("\\nginx")
+        || lower.ends_with("\\apache")
+        || lower.ends_with("\\docker")
+        || lower.ends_with("\\android")
+        || lower.ends_with("\\android sdk")
+        || lower.ends_with("\\sdk")
+    {
+        return FileCategory::Software;
+    }
+
+    // Backup / sync tools
+    if lower.contains("\\backup\\")
+        || lower.contains("\\backups\\")
+        || lower.contains("\\syncthing\\")
+        || lower.ends_with("\\backup")
+        || lower.ends_with("\\backups")
+    {
+        return FileCategory::Documents;
+    }
+
+    // Root-level directories
+    if lower.ends_with("\\users") {
+        return FileCategory::Documents;
+    }
+    if lower.ends_with("\\programdata") {
+        return FileCategory::Software;
+    }
+    if lower.ends_with("\\windows") {
+        return FileCategory::System;
+    }
+
     FileCategory::Other
 }
 
@@ -183,27 +331,18 @@ pub struct ClassifiedItem {
     pub size_kb: u64,
 }
 
-/// Classify a list of DiskItems from scanner into categories
+/// Classify a list of DiskItems from scanner into categories (non-recursive)
 pub fn classify_disk_items(items: &[crate::scanner::DiskItem]) -> Vec<ClassifiedItem> {
-    let mut result = Vec::new();
-    for item in items {
-        classify_recursive(item, &mut result);
-    }
-    result
-}
-
-fn classify_recursive(item: &crate::scanner::DiskItem, result: &mut Vec<ClassifiedItem>) {
-    let cat = classify_path(&item.path);
-    result.push(ClassifiedItem {
-        path: item.path.clone(),
-        category: cat.as_str().to_string(),
-        category_cn: cat.label_cn().to_string(),
-        safety: cat.safety().to_string(),
-        size_kb: item.size_kb,
-    });
-    for child in &item.children {
-        classify_recursive(child, result);
-    }
+    items.iter().map(|item| {
+        let cat = classify_path(&item.path);
+        ClassifiedItem {
+            path: item.path.clone(),
+            category: cat.as_str().to_string(),
+            category_cn: cat.label_cn().to_string(),
+            safety: cat.safety().to_string(),
+            size_kb: item.size_kb,
+        }
+    }).collect()
 }
 
 /// Group classified items by category and sum sizes
@@ -245,4 +384,6 @@ pub struct CategorySummaryList {
     pub summaries: Vec<CategorySummary>,
     pub total_size_kb: u64,
     pub total_files: u64,
+    pub scanned_paths: Vec<String>,
+    pub large_files: Vec<crate::scanner::LargeFileInfo>,
 }

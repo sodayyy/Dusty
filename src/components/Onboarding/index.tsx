@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const ONBOARDING_KEY = "dusty-onboarded";
 
@@ -40,11 +38,20 @@ interface Props {
 
 export default function Onboarding({ onFinish }: Props) {
   const [step, setStep] = useState(0);
+  const [visible, setVisible] = useState(true);
   const current = STEPS[step];
+
+  const goTo = (next: number) => {
+    setVisible(false);
+    setTimeout(() => {
+      setStep(next);
+      setVisible(true);
+    }, 100);
+  };
 
   const handleNext = () => {
     if (step < STEPS.length - 1) {
-      setStep(step + 1);
+      goTo(step + 1);
     } else {
       markOnboarded();
       onFinish();
@@ -52,60 +59,84 @@ export default function Onboarding({ onFinish }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center px-6">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={step}
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -40 }}
-          transition={{ duration: 0.3 }}
-          className="flex flex-col items-center text-center w-full max-w-sm"
-        >
-          {/* Emoji */}
-          <p className="text-6xl mb-8">{current.emoji}</p>
+    <div style={{ position:'fixed', inset:0, zIndex:50, background:'#FAF6EF', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+      <div
+        style={{
+          display:'flex', flexDirection:'column', alignItems:'center', width:'100%',
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'translateX(0)' : 'translateX(20px)',
+          transition: 'opacity 0.2s ease, transform 0.2s ease',
+        }}
+      >
+        {/* Emoji */}
+        <p style={{ fontSize:64, marginBottom:32, lineHeight:1 }}>{current.emoji}</p>
 
-          {/* Progress dots */}
-          <div className="flex gap-2 mb-8">
-            {STEPS.map((_, i) => (
-              <div
-                key={i}
-                className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                  i === step ? "bg-primary" : "bg-muted"
-                }`}
-              />
-            ))}
+        {/* Progress dots */}
+        <div style={{ display:'flex', gap:8, marginBottom:32 }}>
+          {STEPS.map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width:10, height:10, borderRadius:'50%',
+                background: i === step ? '#E8A87C' : '#EDE0D0',
+                transition: 'background 0.2s',
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Card */}
+        <div style={{ background:'#FFF8EE', border:'1px solid #EDE0D0', borderRadius:16, padding:24, width:320, marginBottom:32, boxSizing:'border-box' }}>
+          <h2 style={{ fontSize:18, fontWeight:600, color:'#3D2C1E', margin:'0 0 4px 0' }}>
+            {current.title}
+          </h2>
+          <p style={{ fontSize:14, color:'#E8A87C', margin:'0 0 12px 0' }}>{current.subtitle}</p>
+          <p style={{ fontSize:14, color:'#8A7060', lineHeight:1.6, margin:0 }}>
+            {current.body}
+          </p>
+        </div>
+
+        {/* Bottom actions */}
+        <div style={{ width:320, display:'flex', flexDirection:'column', alignItems:'center', gap:0 }}>
+          <div style={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            {step > 0 ? (
+              <button
+                onClick={() => goTo(step - 1)}
+                style={{ background:'transparent', color:'#8A7060', border:'none', fontSize:14, cursor:'pointer', padding:'10px 12px', display:'flex', alignItems:'center', gap:4 }}
+              >
+                <ChevronLeft style={{ width:16, height:16 }} />
+                上一步
+              </button>
+            ) : (
+              <div />
+            )}
+            <button
+              onClick={handleNext}
+              style={{ background:'#E8A87C', color:'#fff', borderRadius:12, padding:'10px 28px', border:'none', fontSize:14, fontWeight:500, cursor:'pointer', minWidth:120 }}
+            >
+              {step < STEPS.length - 1 ? (
+                <span style={{ display:'flex', alignItems:'center', gap:4 }}>
+                  下一步 <ChevronRight style={{ width:16, height:16 }} />
+                </span>
+              ) : (
+                "开始使用"
+              )}
+            </button>
           </div>
-
-          {/* Card */}
-          <div className="bg-card border border-border rounded-2xl p-6 w-full mb-8">
-            <h2 className="text-lg font-semibold text-foreground mb-1">
-              {current.title}
-            </h2>
-            <p className="text-sm text-primary mb-3">{current.subtitle}</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {current.body}
-            </p>
-          </div>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Bottom actions */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background to-transparent flex items-center justify-between max-w-sm mx-auto w-full">
-        {step > 0 ? (
-          <Button variant="ghost" size="sm" onClick={() => setStep(step - 1)}>
-            <ChevronLeft /> 上一步
-          </Button>
-        ) : (
-          <div />
-        )}
-        <Button onClick={handleNext} className="rounded-xl min-w-[120px]">
-          {step < STEPS.length - 1 ? (
-            <>下一步 <ChevronRight /></>
-          ) : (
-            "开始使用"
+          {step === STEPS.length - 1 && (
+            <button
+              onClick={() => { markOnboarded(); onFinish(); }}
+              style={{
+                background: 'transparent', border: 'none', color: '#8A7060',
+                fontSize: 12, cursor: 'pointer', marginTop: 12, padding: '4px 8px',
+                textDecoration: 'underline',
+                textDecorationColor: 'rgba(138,112,96,0.3)',
+              }}
+            >
+              不再提示
+            </button>
           )}
-        </Button>
+        </div>
       </div>
     </div>
   );

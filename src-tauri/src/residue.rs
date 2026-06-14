@@ -3,6 +3,19 @@ use serde::Serialize;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct DeleteItem {
+    pub path: String,
+    pub category: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct DeleteSummary {
+    pub deleted: usize,
+    pub failed: usize,
+    pub errors: Vec<String>,
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct ResidueItem {
     pub path: String,
@@ -279,4 +292,68 @@ pub fn scan_residues(software_name: &str, install_location: &str) -> Result<Resi
         file_count,
         system_count: sys_count,
     })
+}
+
+/// 直接删除残留项（文件/目录/注册表），不经暂存区
+#[tauri::command]
+pub fn delete_residues(items: Vec<DeleteItem>) -> Result<DeleteSummary, String> {
+    use winreg::enums::*;
+    use winreg::RegKey;
+
+    let mut deleted = 0usize;
+    let mut failed = 0usize;
+    let mut errors: Vec<String> = Vec::new();
+
+    for item in &items {
+        let path = &item.path;
+
+        // 注册表项：路径以 HKLM 或 HKCU 开头
+        if path.starts_with("HKLM\\") || path.starts_with("HKCU\\") {
+            let (hive_str, reg_path) = if path.starts_with("HKLM\\") {
+                ("HKLM", &path["HKLM\\".len()..])
+            } else {
+                ("HKCU", &path["HKCU\\".len()..])
+            };
+
+            let predef = if hive_str == "HKLM" {
+                RegKey::predef(HKEY_LOCAL_MACHINE)
+            } else {
+                RegKey::predef(HKEY_CURRENT_USER)
+            };
+
+            match crate::registry::delete_key(&predef, reg_path) {
+                Ok(_) => deleted += 1,
+                Err(e) => {
+                    failed += 1;
+                    errors.push(format!("注册表删除失败 {}: {}", path, e));
+                }
+            }
+            continue;
+        }
+
+        // 文件或目录
+        let p = std::path::Path::new(path);
+        if !p.exists() {
+            deleted += 1;
+            continue;
+        }
+
+        let result = if p.is_dir() {
+            std::fs::remove_dir_all(p)
+                .map_err(|e| format!("删除目录失败 {}: {}", path, e))
+        } else {
+            std::fs::remove_file(p)
+                .map_err(|e| format!("删除文件失败 {}: {}", path, e))
+        };
+
+        match result {
+            Ok(_) => deleted += 1,
+            Err(e) => {
+                failed += 1;
+                errors.push(e);
+            }
+        }
+    }
+
+    Ok(DeleteSummary { deleted, failed, errors })
 }

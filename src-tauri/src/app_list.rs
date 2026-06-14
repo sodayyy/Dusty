@@ -3,6 +3,34 @@ use std::collections::HashSet;
 use winreg::enums::*;
 use winreg::RegKey;
 
+fn get_dir_size_kb(path: &str) -> u64 {
+    if path.is_empty() {
+        return 0;
+    }
+    let p = std::path::Path::new(path);
+    if !p.exists() {
+        return 0;
+    }
+    let mut total: u64 = 0;
+    if let Ok(entries) = std::fs::read_dir(p) {
+        for entry in entries.filter_map(|e| e.ok()) {
+            let ep = entry.path();
+            if ep.is_file() {
+                total += entry.metadata().map(|m| m.len()).unwrap_or(0);
+            } else if ep.is_dir() {
+                if let Ok(sub) = std::fs::read_dir(&ep) {
+                    for se in sub.filter_map(|e| e.ok()) {
+                        if se.path().is_file() {
+                            total += se.metadata().map(|m| m.len()).unwrap_or(0);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    total / 1024
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct AppInfo {
     pub name: String,
@@ -51,7 +79,15 @@ fn read_uninstall_key(predef: &RegKey, sub_path: &str) -> Vec<AppInfo> {
             install_date: subkey.get_value("InstallDate").unwrap_or_default(),
             install_location: subkey.get_value("InstallLocation").unwrap_or_default(),
             uninstall_string: subkey.get_value("UninstallString").unwrap_or_default(),
-            size_kb: subkey.get_value::<u32, _>("EstimatedSize").map(|v| v as u64).unwrap_or(0),
+            size_kb: {
+                let reg_size = subkey.get_value::<u32, _>("EstimatedSize").map(|v| v as u64).unwrap_or(0);
+                if reg_size > 0 {
+                    reg_size
+                } else {
+                    let loc: String = subkey.get_value("InstallLocation").unwrap_or_default();
+                    get_dir_size_kb(&loc)
+                }
+            },
         });
     }
 

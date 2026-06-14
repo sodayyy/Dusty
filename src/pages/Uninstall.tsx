@@ -1,42 +1,33 @@
-import { useEffect } from "react";
-import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, CheckCircle, AlertTriangle } from "lucide-react";
 import { useAppStore } from "@/store";
 import ScanResult from "@/components/ScanResult";
 import { formatSize } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
-export default function Uninstall() {
+export default function Uninstall({ onDone }: { onDone?: () => void }) {
   const {
     selectedApp,
     uninstallPhase,
     uninstallResult,
     flowError,
+    deleteResult,
     startUninstall,
-    scanAfterUninstall,
+    verifyAndScan,
     resetUninstall,
-    moveSelectedToStaging,
+    deleteSelectedResidues,
     selectedResiduePaths,
     residues,
   } = useAppStore();
 
-  // Auto-advance: after uninstall completes, scan for residues
-  useEffect(() => {
-    if (uninstallPhase === "scanning" && selectedApp && uninstallResult) {
-      scanAfterUninstall(selectedApp);
-    }
-  }, [uninstallPhase, selectedApp, uninstallResult]);
-
   if (!selectedApp) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-3 px-4 bg-[#FAF6EF]">
-        <p className="text-muted-foreground text-sm">没有选中的软件</p>
-        <Button
-          variant="link"
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', gap:12, padding:'0 16px', backgroundColor:'#FAF6EF' }}>
+        <p style={{ color:'#8A7060', fontSize:13, margin:0 }}>没有选中的软件</p>
+        <button
           onClick={resetUninstall}
+          style={{ border:'none', background:'transparent', cursor:'pointer', fontSize:13, color:'#E8A87C' }}
         >
           返回列表
-        </Button>
+        </button>
       </div>
     );
   }
@@ -48,25 +39,19 @@ export default function Uninstall() {
       .reduce((sum, r) => sum + r.size_kb, 0) ?? 0;
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-[#FAF6EF]">
+    <div style={{ display:'flex', flexDirection:'column', height:'100%', width:'100%', overflow:'hidden', backgroundColor:'#FAF6EF' }}>
       {/* Header */}
-      <header className="shrink-0 px-4 pt-5 pb-3 flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={resetUninstall}
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-semibold text-foreground truncate">
-            {selectedApp.name}
-          </h1>
-          <p className="text-xs text-muted-foreground">深度卸载</p>
+      <header style={{ flexShrink:0, padding:'16px 24px 12px', display:'flex', alignItems:'center', gap:12, borderBottom:'0.5px solid #EDE0D0', backgroundColor:'#FFF8EE' }}>
+        <button onClick={resetUninstall} style={{ width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center', border:'none', background:'transparent', cursor:'pointer', borderRadius:8, flexShrink:0 }}>
+          <ArrowLeft style={{ width:22, height:22, color:'#3D2C1E' }} />
+        </button>
+        <div style={{ flex:1, minWidth:0 }}>
+          <h1 style={{ fontSize:15, fontWeight:600, color:'#3D2C1E', margin:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{selectedApp.name}</h1>
+          <p style={{ fontSize:12, color:'#8A7060', margin:0 }}>深度卸载</p>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-4 pb-6">
+      <main style={{ flex:1, overflowY:'auto', padding:'16px 24px 24px' }}>
         {/* Phase: idle — confirm */}
         {uninstallPhase === "idle" && (
           <ConfirmStep
@@ -78,7 +63,44 @@ export default function Uninstall() {
 
         {/* Phase: uninstalling */}
         {uninstallPhase === "uninstalling" && (
-          <LoadingStep message="正在调用官方卸载程序…" sub="请稍候，完成后会自动扫描残留" />
+          <LoadingStep
+            message="官方卸载向导已弹出"
+            sub="请在弹出的窗口中完成卸载操作，完成后 Dusty 会自动继续"
+          />
+        )}
+
+        {/* Phase: verifying */}
+        {uninstallPhase === "verifying" && (
+          <LoadingStep message="正在验证卸载结果…" sub="检查软件目录和注册表是否已清理" />
+        )}
+
+        {/* Phase: verify_failed */}
+        {uninstallPhase === "verify_failed" && (
+          <div style={{ paddingTop: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, textAlign: 'center' }}>
+            <p style={{ fontSize: 40, margin: 0 }}>🤔</p>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 600, color: '#3D2C1E', margin: 0 }}>
+                卸载似乎未完成
+              </p>
+              <p style={{ fontSize: 12, color: '#8A7060', margin: '6px 0 0', maxWidth: 300 }}>
+                软件目录或注册表记录仍然存在。可能是卸载向导被取消，或卸载程序未完全执行。
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+              <button
+                onClick={() => { if (selectedApp) startUninstall(selectedApp); }}
+                style={{ padding: '10px 24px', borderRadius: 12, border: 'none', backgroundColor: '#E8A87C', color: 'white', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}
+              >
+                重试卸载
+              </button>
+              <button
+                onClick={resetUninstall}
+                style={{ padding: '10px 24px', borderRadius: 12, border: '0.5px solid #EDE0D0', backgroundColor: 'transparent', color: '#3D2C1E', fontSize: 13, cursor: 'pointer' }}
+              >
+                取消
+              </button>
+            </div>
+          </div>
         )}
 
         {/* Phase: scanning */}
@@ -92,7 +114,7 @@ export default function Uninstall() {
           <ErrorRecoveryStep
             message={flowError ?? "扫描未能返回结果"}
             onRetry={() => {
-              if (selectedApp) scanAfterUninstall(selectedApp);
+              if (selectedApp) verifyAndScan(selectedApp);
             }}
             onCancel={resetUninstall}
           />
@@ -105,26 +127,16 @@ export default function Uninstall() {
             uninstallResult={uninstallResult}
             selectedCount={selectedCount}
             totalSize={totalSize}
-            onStage={() => moveSelectedToStaging(selectedApp.name)}
-            onScanRetry={() => {
-              if (selectedApp) scanAfterUninstall(selectedApp);
-            }}
+            onDelete={() => deleteSelectedResidues(selectedApp.name)}
+            onSkip={resetUninstall}
+            onScanRetry={() => { if (selectedApp) verifyAndScan(selectedApp); }}
             error={flowError}
           />
         )}
 
-        {/* Phase: staging (moving) */}
-        {uninstallPhase === "staging" && !flowError && (
-          <LoadingStep message="正在移入暂存区…" sub="文件将在7天后自动清除" />
-        )}
-
-        {/* Phase: staging error */}
-        {uninstallPhase === "staging" && flowError && (
-          <ErrorRecoveryStep
-            message={flowError}
-            onRetry={() => moveSelectedToStaging(selectedApp.name)}
-            onCancel={resetUninstall}
-          />
+        {/* Phase: deleting */}
+        {uninstallPhase === "deleting" && (
+          <LoadingStep message="正在清理残留…" sub="删除注册表碎片和遗留文件" />
         )}
 
         {/* Phase: uninstalling error (caught mid-flight) */}
@@ -142,9 +154,8 @@ export default function Uninstall() {
         {uninstallPhase === "done" && (
           <DoneStep
             softwareName={selectedApp.name}
-            selectedCount={selectedCount}
-            totalSize={totalSize}
-            onDone={resetUninstall}
+            deleteResult={deleteResult}
+            onDone={() => { resetUninstall(); onDone?.(); }}
           />
         )}
       </main>
@@ -162,10 +173,10 @@ function ConfirmStep({
   error: string | null;
 }) {
   return (
-    <div className="pt-8 space-y-5">
-      <div className="bg-card rounded-2xl p-5 border border-border space-y-3">
-        <h2 className="text-sm font-medium text-foreground">确认卸载</h2>
-        <div className="space-y-2 text-sm">
+    <div style={{ paddingTop:32, display:'flex', flexDirection:'column', gap:20 }}>
+      <div style={{ backgroundColor:'#FFF8EE', borderRadius:16, padding:20, border:'0.5px solid #EDE0D0', display:'flex', flexDirection:'column', gap:12 }}>
+        <h2 style={{ fontSize:13, fontWeight:500, color:'#3D2C1E', margin:0 }}>确认卸载</h2>
+        <div style={{ display:'flex', flexDirection:'column', gap:8, fontSize:13 }}>
           <InfoRow label="软件名" value={app.name} />
           {app.publisher && <InfoRow label="开发商" value={app.publisher} />}
           {app.version && <InfoRow label="版本" value={app.version} />}
@@ -175,41 +186,52 @@ function ConfirmStep({
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground leading-relaxed">
-        将先调用官方卸载程序，然后扫描残留文件、注册表项和系统项。
-        所有删除内容会先移入暂存区，7天内可随时还原。
+      <p style={{ fontSize:12, color:'#8A7060', lineHeight:1.6, margin:0 }}>
+        将调用官方卸载向导，请在弹出的窗口中完成操作，
+        等待 Dusty 自动扫描残留并清理。
       </p>
 
+      <div style={{
+        padding: '12px 16px', borderRadius: 10,
+        backgroundColor: 'rgba(224,112,96,0.08)',
+        border: '0.5px solid rgba(224,112,96,0.3)',
+        display: 'flex', alignItems: 'flex-start', gap: 8,
+      }}>
+        <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
+        <p style={{ fontSize: 12, color: '#E07060', margin: 0, lineHeight: 1.6 }}>
+          卸载后软件将从系统移除。Dusty 会弹出官方卸载向导，
+          请在弹出窗口中完成操作后等待 Dusty 自动继续。
+        </p>
+      </div>
+
       {error && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-destructive/10 text-destructive text-xs">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
+        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', borderRadius:8, backgroundColor:'#E0706020', color:'#E07060', fontSize:12 }}>
+          <AlertTriangle style={{ width:16, height:16, flexShrink:0 }} />
           {error}
         </div>
       )}
 
-      <Button
+      <button
         onClick={onStart}
-        className="w-full py-3 rounded-xl"
+        style={{ width:'100%', padding:'12px 0', borderRadius:12, border:'none', backgroundColor:'#E8A87C', color:'white', fontSize:14, fontWeight:600, cursor:'pointer' }}
       >
         开始深度卸载
-      </Button>
+      </button>
     </div>
   );
 }
 
 function LoadingStep({ message, sub }: { message: string; sub: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="flex flex-col items-center justify-center pt-20 gap-4"
+    <div
+      style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', paddingTop:80, gap:16 }}
     >
-      <Loader2 className="w-8 h-8 text-primary animate-spin" />
-      <div className="text-center">
-        <p className="text-sm font-medium text-foreground">{message}</p>
-        <p className="text-xs text-muted-foreground mt-1">{sub}</p>
+      <Loader2 style={{ width:32, height:32, color:'#E8A87C' }} className="dusty-spin" />
+      <div style={{ textAlign:'center' }}>
+        <p style={{ fontSize:13, fontWeight:500, color:'#3D2C1E', margin:0 }}>{message}</p>
+        <p style={{ fontSize:12, color:'#8A7060', margin:0, marginTop:4 }}>{sub}</p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -218,7 +240,8 @@ function ReviewStep({
   uninstallResult,
   selectedCount,
   totalSize,
-  onStage,
+  onDelete,
+  onSkip,
   onScanRetry,
   error,
 }: {
@@ -226,19 +249,20 @@ function ReviewStep({
   uninstallResult: { success: boolean } | null;
   selectedCount: number;
   totalSize: number;
-  onStage: () => void;
+  onDelete: () => void;
+  onSkip: () => void;
   onScanRetry: () => void;
   error: string | null;
 }) {
   return (
-    <div className="pt-4 space-y-4">
+    <div style={{ display:'flex', flexDirection:'column', gap:16, paddingTop:16 }}>
       {/* Uninstall result banner */}
       <div
-        className={`rounded-xl px-4 py-3 text-sm ${
-          uninstallResult?.success
-            ? "bg-chart-2/10 text-chart-2"
-            : "bg-destructive/10 text-destructive"
-        }`}
+        style={{
+          borderRadius:12, padding:'12px 16px', fontSize:13,
+          backgroundColor: uninstallResult?.success ? '#6DBF9E20' : '#E0706020',
+          color: uninstallResult?.success ? '#6DBF9E' : '#E07060',
+        }}
       >
         {uninstallResult?.success
           ? "官方卸载程序已执行完成"
@@ -246,7 +270,7 @@ function ReviewStep({
       </div>
 
       {/* Scan summary */}
-      <div className="grid grid-cols-3 gap-3">
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
         <StatBadge label="注册表项" count={residues.registry_count} />
         <StatBadge label="文件/文件夹" count={residues.file_count} />
         <StatBadge label="系统项" count={residues.system_count} />
@@ -256,28 +280,34 @@ function ReviewStep({
       <ScanResult onRetry={onScanRetry} />
 
       {/* Bottom action bar */}
-      <div className="sticky bottom-0 bg-[#FAF6EF] pt-3 border-t border-border">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-muted-foreground">
+      <div style={{ flexShrink:0, backgroundColor:'#FAF6EF', paddingTop:12, borderTop:'0.5px solid #EDE0D0' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+          <span style={{ fontSize:12, color:'#8A7060' }}>
             已选 {selectedCount} 项 · 共 {formatSize(totalSize)}
           </span>
         </div>
 
         {error && (
-          <div className="mb-3 text-xs text-destructive flex items-center gap-1">
-            <AlertTriangle className="w-3 h-3" /> {error}
+          <div style={{ marginBottom:12, fontSize:12, color:'#E07060', display:'flex', alignItems:'center', gap:4 }}>
+            <AlertTriangle style={{ width:12, height:12 }} /> {error}
           </div>
         )}
 
-        <Button
-          onClick={onStage}
-          disabled={selectedCount === 0}
-          className="w-full py-3 rounded-xl"
-        >
-          {selectedCount === 0
-            ? "请选择要清理的残留"
-            : `移入暂存区 (${selectedCount}项)`}
-        </Button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={onSkip}
+            style={{ flex: 1, padding: '12px 0', borderRadius: 12, border: '0.5px solid #EDE0D0', backgroundColor: 'transparent', color: '#8A7060', fontSize: 13, cursor: 'pointer' }}
+          >
+            跳过，不清理
+          </button>
+          <button
+            onClick={onDelete}
+            disabled={selectedCount === 0}
+            style={{ flex: 2, padding: '12px 0', borderRadius: 12, border: 'none', backgroundColor: selectedCount === 0 ? '#EDE0D0' : '#E8A87C', color: selectedCount === 0 ? '#8A7060' : 'white', fontSize: 14, fontWeight: 600, cursor: selectedCount === 0 ? 'default' : 'pointer' }}
+          >
+            {selectedCount === 0 ? '请选择要清理的残留' : `清理残留 (${selectedCount}项)`}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -293,90 +323,79 @@ function ErrorRecoveryStep({
   onCancel: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="flex flex-col items-center justify-center pt-16 gap-4"
+    <div
+      style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', paddingTop:64, gap:16 }}
     >
-      <p className="text-3xl">😥</p>
-      <div className="text-center space-y-1">
-        <p className="text-sm font-medium text-foreground">呜，出了点问题…</p>
-        <p className="text-xs text-muted-foreground max-w-xs text-center">
+      <p style={{ fontSize:36, margin:0 }}>😥</p>
+      <div style={{ textAlign:'center' }}>
+        <p style={{ fontSize:13, fontWeight:500, color:'#3D2C1E', margin:0 }}>呜，出了点问题…</p>
+        <p style={{ fontSize:12, color:'#8A7060', margin:0, maxWidth:320, textAlign:'center' }}>
           {message}
         </p>
       </div>
-      <div className="flex gap-3 mt-2">
-        <Button
-          onClick={onRetry}
-          className="rounded-xl"
-        >
-          重试
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={onCancel}
-          className="rounded-xl"
-        >
-          取消
-        </Button>
+      <div style={{ display:'flex', gap:12, marginTop:8 }}>
+        <button onClick={onRetry} style={{ padding:'10px 24px', borderRadius:12, border:'none', backgroundColor:'#E8A87C', color:'white', fontSize:13, fontWeight:500, cursor:'pointer' }}>重试</button>
+        <button onClick={onCancel} style={{ padding:'10px 24px', borderRadius:12, border:'1px solid #EDE0D0', backgroundColor:'transparent', color:'#3D2C1E', fontSize:13, fontWeight:500, cursor:'pointer' }}>取消</button>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 function DoneStep({
   softwareName,
-  selectedCount,
-  totalSize,
+  deleteResult,
   onDone,
 }: {
   softwareName: string;
-  selectedCount: number;
-  totalSize: number;
+  deleteResult: { deleted: number; failed: number; errors: string[] } | null;
   onDone: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center pt-16 gap-4 text-center"
+    <div
+      style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:64, gap:16, textAlign:'center' }}
     >
-      <div className="w-16 h-16 rounded-full bg-chart-2/15 flex items-center justify-center">
-        <CheckCircle className="w-8 h-8 text-chart-2" />
+      <div style={{ width:64, height:64, borderRadius:'50%', backgroundColor:'#6DBF9E22', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <CheckCircle style={{ width:32, height:32, color:'#6DBF9E' }} />
       </div>
       <div>
-        <h2 className="text-lg font-semibold text-foreground">清理完成</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          {softwareName} 的 {selectedCount} 个残留已扫进垃圾桶
+        <h2 style={{ fontSize:17, fontWeight:600, color:'#3D2C1E', margin:0 }}>清理完成</h2>
+        <p style={{ fontSize:13, color:'#8A7060', margin:0, marginTop:4 }}>
+          {deleteResult
+            ? `已清理 ${deleteResult.deleted} 项残留${deleteResult.failed > 0 ? `，${deleteResult.failed} 项清理失败` : ''}`
+            : `${softwareName} 已卸载完成`}
         </p>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          释放空间约 {formatSize(totalSize)}，7天后自动清除
-        </p>
+        {deleteResult && deleteResult.failed > 0 && (
+          <p style={{ fontSize: 11, color: '#E07060', margin: '4px 0 0' }}>
+            部分残留可能需要管理员权限才能删除
+          </p>
+        )}
       </div>
-      <Button
-        onClick={onDone}
-        className="mt-4 px-8 rounded-xl"
-      >
-        完成
-      </Button>
-    </motion.div>
+      <div style={{ marginTop:16, display:'flex', flexDirection:'column', alignItems:'center', gap:8 }}>
+        <button
+          onClick={onDone}
+          style={{ padding:'10px 32px', borderRadius:12, border:'none', backgroundColor:'#E8A87C', color:'white', fontSize:14, fontWeight:600, cursor:'pointer' }}
+        >
+          完成
+        </button>
+      </div>
+    </div>
   );
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-3">
-      <span className="text-muted-foreground shrink-0">{label}</span>
-      <span className="text-foreground truncate text-right">{value}</span>
+    <div style={{ display:'flex', justifyContent:'space-between', gap:12 }}>
+      <span style={{ color:'#8A7060', flexShrink:0, fontSize:13 }}>{label}</span>
+      <span style={{ color:'#3D2C1E', textAlign:'right', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontSize:13 }}>{value}</span>
     </div>
   );
 }
 
 function StatBadge({ label, count }: { label: string; count: number }) {
   return (
-    <div className="bg-card border border-border rounded-xl px-3 py-2.5 text-center">
-      <div className="text-lg font-semibold text-foreground">{count}</div>
-      <div className="text-2xs text-muted-foreground">{label}</div>
+    <div style={{ backgroundColor:'#FFF8EE', border:'0.5px solid #EDE0D0', borderRadius:12, padding:'10px 12px', textAlign:'center' }}>
+      <div style={{ fontSize:18, fontWeight:600, color:'#3D2C1E', margin:0 }}>{count}</div>
+      <div style={{ fontSize:11, color:'#8A7060', margin:0 }}>{label}</div>
     </div>
   );
 }

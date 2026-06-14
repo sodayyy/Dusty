@@ -125,20 +125,39 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
   html {
     font-family: var(--font-sans);
   }
 }
 
-/* Force override for Tailwind v4 variable mapping issue */
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: #FAF6EF;
+}
+
 body {
-  background-color: #FAF6EF !important;
-  color: #3D2C1E !important;
-  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #FAF6EF;
+  color: #3D2C1E;
+  overflow: hidden;
 }
 
 #root {
+  height: 100%;
   background-color: #FAF6EF;
-  min-height: 100vh;
+}
+
+/* Dusty custom animation (does not depend on Tailwind utility classes) */
+@keyframes dusty-spin {
+  to { transform: rotate(360deg); }
+}
+.dusty-spin {
+  animation: dusty-spin 1s linear infinite;
 }

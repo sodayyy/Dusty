@@ -120,10 +120,27 @@ export interface CategorySummary {
   safety: string;
 }
 
+export interface LargeFileInfo {
+  path: string;
+  name: string;
+  size_kb: number;
+  category: string;
+}
+
+export interface HotspotItem {
+  name: string;
+  path: string;
+  size_kb: number;
+  description: string;
+  safety: string;
+}
+
 export interface CategorySummaryList {
   summaries: CategorySummary[];
   total_size_kb: number;
   total_files: number;
+  scanned_paths: string[];
+  large_files: LargeFileInfo[];
 }
 
 export async function scanDisk(paths: string[]): Promise<ScanResult> {
@@ -134,6 +151,10 @@ export async function scanSinglePath(pathStr: string): Promise<DiskItem> {
   return invoke<DiskItem>("scan_single_path", { pathStr });
 }
 
+export async function getAvailableDrives(): Promise<string[]> {
+  return invoke<string[]>("get_available_drives");
+}
+
 export async function getDefaultScanPaths(): Promise<string[]> {
   return invoke<string[]>("get_default_scan_paths");
 }
@@ -142,4 +163,35 @@ export async function scanClassified(
   paths: string[]
 ): Promise<CategorySummaryList> {
   return invoke<CategorySummaryList>("scan_classified", { paths });
+}
+
+export async function detectHotspots(): Promise<HotspotItem[]> {
+  return invoke<HotspotItem[]>("detect_hotspots");
+}
+
+export interface DeleteItem {
+  path: string;
+  category: string;
+}
+
+export interface DeleteSummary {
+  deleted: number;
+  failed: number;
+  errors: string[];
+}
+
+export async function verifyUninstalled(
+  installLocation: string,
+  softwareName: string
+): Promise<boolean> {
+  return invoke<boolean>("verify_uninstalled", {
+    installLocation,
+    softwareName,
+  });
+}
+
+export async function deleteResidues(
+  items: DeleteItem[]
+): Promise<DeleteSummary> {
+  return invoke<DeleteSummary>("delete_residues", { items });
 }

@@ -1,5 +1,6 @@
 mod app_list;
 mod classifier;
+mod hotspot;
 mod registry;
 mod residue;
 mod scanner;
@@ -7,11 +8,13 @@ mod staging;
 mod uninstaller;
 use app_list::get_installed_apps;
 use residue::scan_residues;
-use scanner::{get_default_scan_paths, scan_classified, scan_disk, scan_single_path};
+use hotspot::detect_hotspots;
+use scanner::{get_available_drives, get_default_scan_paths, scan_classified, scan_disk, scan_single_path};
 use staging::{
     check_interrupted, empty_trash, list_staged, move_to_staging, restore_from_staging,
 };
-use uninstaller::run_uninstaller;
+use uninstaller::{run_uninstaller, verify_uninstalled};
+use residue::delete_residues;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -40,7 +43,11 @@ pub fn run() {
             scan_disk,
             scan_single_path,
             scan_classified,
-            get_default_scan_paths
+            get_default_scan_paths,
+            get_available_drives,
+            detect_hotspots,
+            verify_uninstalled,
+            delete_residues
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -47,32 +47,65 @@ export async function verifyApiKey(key?: string): Promise<string> {
 
 async function callDeepseek(
   messages: { role: string; content: string }[],
-  temperature = 0.3
+  temperature = 0.3,
+  maxRetries = 2
 ): Promise<string> {
   const key = await getApiKey();
   if (!key) throw new Error("API Key not configured");
 
-  const res = await fetch(`${DEEPSEEK_BASE}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify({
-      model: "deepseek-chat",
-      messages,
-      temperature,
-      max_tokens: 1024,
-    }),
-  });
+  let lastError: Error = new Error("Unknown error");
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`DeepSeek API error ${res.status}: ${err}`);
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      const res = await fetch(`${DEEPSEEK_BASE}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${key}`,
+        },
+        body: JSON.stringify({
+          model: "deepseek-chat",
+          messages,
+          temperature,
+          max_tokens: 1024,
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`DeepSeek API error ${res.status}: ${err}`);
+      }
+
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content ?? "";
+
+    } catch (e: unknown) {
+      lastError = e instanceof Error ? e : new Error(String(e));
+      const msg = lastError.message.toLowerCase();
+
+      if (
+        msg.includes("401") ||
+        msg.includes("400") ||
+        msg.includes("api key")
+      ) {
+        throw lastError;
+      }
+
+      if (attempt < maxRetries) {
+        const delay = 1000 * (attempt + 1);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+    }
   }
 
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? "";
+  throw lastError;
 }
 
 // ── Layer A: File classification ──
@@ -153,7 +186,17 @@ Rules:
 "Warning: {risk description}. Deleting these files may affect system stability. Please decide carefully."
 4. Normal replies: cute, lively tone. End sentences with "~" or "yo" occasionally.
 5. Keep replies short (2-3 sentences max).
-6. Reply in the same language the user uses (Chinese → Chinese, English → English).`;
+6. When the user asks whether a selected software is safe to delete or uninstall:
+   - Check the software name and publisher for clues.
+   - If the name contains keywords like "Driver", "Chipset", "Intel", "AMD", "NVIDIA",
+     "Runtime", "Redistributable", "Framework", ".NET", "Visual C++", "DirectX",
+     "Management Engine", "Serial IO", "Graphics", "Audio", "Realtek", "Synaptics",
+     reply that this is likely a system component or driver, and advise the user NOT
+     to uninstall it unless they know exactly what they are doing.
+   - If the software is a known user application (game, productivity app, browser),
+     reply that it is generally safe to uninstall.
+   - If uncertain, advise caution and suggest checking the publisher's website.
+7. Reply in the same language the user uses (Chinese → Chinese, English → English).`;
 
 export interface ChatContext {
   softwareName: string;
@@ -194,3 +237,55 @@ export const SUGGESTED_QUESTIONS: Record<string, string[]> = {
     "这个文件夹是干什么用的？",
   ],
 };
+
+// ── Layer C: Software tagging ──
+
+export interface AppTag {
+  name: string;
+  tag: string;
+}
+
+const TAG_PROMPT = `你是一个 Windows 软件分类专家。
+请给以下软件逐一打一个分类标签，只能从这8个中选一个：
+游戏、办公、浏览器、开发工具、系统组件、媒体、安全、其他。
+
+只返回 JSON 数组，不要任何其他文字，格式：
+[{"name":"软件名","tag":"标签"}]
+
+软件列表：
+{list}`;
+
+const tagCache = new Map<string, string>();
+
+export async function tagApps(
+  apps: { name: string; publisher: string }[]
+): Promise<Record<string, string>> {
+  const uncached = apps.filter((a) => !tagCache.has(a.name));
+  if (uncached.length === 0) {
+    const result: Record<string, string> = {};
+    for (const a of apps) result[a.name] = tagCache.get(a.name) ?? "其他";
+    return result;
+  }
+
+  const batch = uncached.slice(0, 60);
+  const list = batch.map((a) => `- ${a.name}（${a.publisher || "未知发行商"}）`).join("\n");
+
+  const prompt = TAG_PROMPT.replace("{list}", list);
+
+  let raw = "";
+  try {
+    raw = await callDeepseek([{ role: "user", content: prompt }], 0.1);
+    const match = raw.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error("no json");
+    const parsed: AppTag[] = JSON.parse(match[0]);
+    for (const item of parsed) {
+      if (item.name && item.tag) tagCache.set(item.name, item.tag);
+    }
+  } catch (e) {
+    console.error("[tagApps] parse error:", e, raw);
+  }
+
+  const result: Record<string, string> = {};
+  for (const a of apps) result[a.name] = tagCache.get(a.name) ?? "其他";
+  return result;
+}

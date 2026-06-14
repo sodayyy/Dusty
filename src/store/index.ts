@@ -3,13 +3,17 @@ import {
   getInstalledApps,
   runUninstaller,
   scanResidues,
-  moveToStaging,
+  verifyUninstalled,
+  deleteResidues,
   type AppInfo,
   type UninstallResult,
   type ResidueScanResult,
+  type CategorySummaryList,
+  type HotspotItem,
+  type DeleteSummary,
 } from "@/lib/tauri-commands";
 
-type UninstallPhase = "idle" | "uninstalling" | "scanning" | "review" | "staging" | "done";
+type UninstallPhase = "idle" | "uninstalling" | "verifying" | "verify_failed" | "scanning" | "review" | "deleting" | "done";
 
 interface AppState {
   apps: AppInfo[];
@@ -21,21 +25,20 @@ interface AppState {
   fetchApps: () => Promise<void>;
   selectApp: (app: AppInfo | null) => void;
   setSearchQuery: (query: string) => void;
-  filteredApps: () => AppInfo[];
 
   // Uninstall flow
   uninstallPhase: UninstallPhase;
   uninstallResult: UninstallResult | null;
   residues: ResidueScanResult | null;
   selectedResiduePaths: Set<string>;
-  stagedId: string | null;
+  deleteResult: DeleteSummary | null;
   flowError: string | null;
 
   startUninstall: (app: AppInfo) => Promise<void>;
-  scanAfterUninstall: (app: AppInfo) => Promise<void>;
+  verifyAndScan: (app: AppInfo) => Promise<void>;
   toggleResidue: (path: string) => void;
   selectAllSafe: () => void;
-  moveSelectedToStaging: (softwareName: string) => Promise<void>;
+  deleteSelectedResidues: (softwareName: string) => Promise<void>;
   resetUninstall: () => void;
 }
 
@@ -60,40 +63,44 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setSearchQuery: (query) => set({ searchQuery: query }),
 
-  filteredApps: () => {
-    const { apps, searchQuery } = get();
-    if (!searchQuery.trim()) return apps;
-    const q = searchQuery.toLowerCase();
-    return apps.filter(
-      (app) =>
-        app.name.toLowerCase().includes(q) ||
-        app.publisher.toLowerCase().includes(q)
-    );
-  },
-
   // Uninstall flow
   uninstallPhase: "idle",
   uninstallResult: null,
   residues: null,
   selectedResiduePaths: new Set(),
-  stagedId: null,
+  deleteResult: null,
   flowError: null,
 
   startUninstall: async (app) => {
     set({ uninstallPhase: "uninstalling", flowError: null, uninstallResult: null });
     try {
       const result = await runUninstaller(app.uninstall_string, true);
-      set({ uninstallResult: result, uninstallPhase: "scanning" });
+      set({ uninstallResult: result, uninstallPhase: "verifying" });
+      get().verifyAndScan(app);
     } catch (e) {
       set({ flowError: String(e), uninstallPhase: "idle" });
     }
   },
 
-  scanAfterUninstall: async (app) => {
-    set({ uninstallPhase: "scanning", flowError: null });
+  verifyAndScan: async (app) => {
+    set({ uninstallPhase: "verifying", flowError: null });
+    try {
+      const success = await verifyUninstalled(
+        app.install_location,
+        app.name
+      );
+      if (!success) {
+        set({ uninstallPhase: "verify_failed" });
+        return;
+      }
+    } catch (e) {
+      set({ flowError: String(e), uninstallPhase: "verify_failed" });
+      return;
+    }
+
+    set({ uninstallPhase: "scanning" });
     try {
       const residues = await scanResidues(app.name, app.install_location);
-      // Pre-select safe items
       const safePaths = new Set(
         residues.items.filter((r) => r.safety === "safe").map((r) => r.path)
       );
@@ -126,20 +133,23 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ selectedResiduePaths: safePaths });
   },
 
-  moveSelectedToStaging: async (softwareName) => {
+  deleteSelectedResidues: async (_softwareName) => {
     const { residues, selectedResiduePaths } = get();
-    if (!residues) return;
-    set({ uninstallPhase: "staging" });
+    if (!residues) {
+      set({ uninstallPhase: "done" });
+      return;
+    }
+    set({ uninstallPhase: "deleting" });
     try {
-      const toMove = residues.items
+      const toDelete = residues.items
         .filter((r) => selectedResiduePaths.has(r.path))
-        .map((r) => ({ path: r.path, category: r.category, safety: r.safety }));
-      if (toMove.length === 0) {
+        .map((r) => ({ path: r.path, category: r.category }));
+      if (toDelete.length === 0) {
         set({ uninstallPhase: "done" });
         return;
       }
-      const id = await moveToStaging(toMove, softwareName);
-      set({ stagedId: id, uninstallPhase: "done" });
+      const result = await deleteResidues(toDelete);
+      set({ deleteResult: result, uninstallPhase: "done" });
     } catch (e) {
       set({ flowError: String(e), uninstallPhase: "review" });
     }
@@ -151,8 +161,53 @@ export const useAppStore = create<AppState>((set, get) => ({
       uninstallResult: null,
       residues: null,
       selectedResiduePaths: new Set(),
-      stagedId: null,
+      deleteResult: null,
       flowError: null,
       selectedApp: null,
+    }),
+}));
+
+interface DiskState {
+  diskScanCache: Record<string, CategorySummaryList>;
+  diskHotspots: HotspotItem[];
+  hotspotsFetched: boolean;
+  selectedDrive: string | null;
+  appTagCache: Record<string, string>;
+
+  setDiskScanCache: (drive: string, data: CategorySummaryList) => void;
+  setDiskHotspots: (items: HotspotItem[]) => void;
+  setSelectedDrive: (drive: string | null) => void;
+  setAppTagCache: (tags: Record<string, string>) => void;
+  clearDiskCache: () => void;
+}
+
+export const useDiskStore = create<DiskState>((set) => ({
+  diskScanCache: {},
+  diskHotspots: [],
+  hotspotsFetched: false,
+  selectedDrive: null,
+  appTagCache: {},
+
+  setDiskScanCache: (drive, data) =>
+    set((state) => ({
+      diskScanCache: { ...state.diskScanCache, [drive]: data },
+    })),
+
+  setDiskHotspots: (items) =>
+    set({ diskHotspots: items, hotspotsFetched: true }),
+
+  setSelectedDrive: (drive) => set({ selectedDrive: drive }),
+
+  setAppTagCache: (tags) =>
+    set((state) => ({
+      appTagCache: { ...state.appTagCache, ...tags },
+    })),
+
+  clearDiskCache: () =>
+    set({
+      diskScanCache: {},
+      diskHotspots: [],
+      hotspotsFetched: false,
+      appTagCache: {},
     }),
 }));

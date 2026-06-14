@@ -16,9 +16,9 @@
         "width": 900,
         "height": 640,
         "resizable": false,
-        "maximized": false,
-        "minWidth": 900,
-        "minHeight": 640
+        "maximizable": false,
+        "minimizable": true,
+        "zoomHotkeysEnabled": false
       }
     ],
     "security": {
